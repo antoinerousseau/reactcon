@@ -1,0 +1,15 @@
+{
+  "name": "reactcon",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "slidev build",
+    "dev": "slidev --open",
+    "export": "slidev export"
+  },
+  "dependencies": {
+    "@slidev/cli": "^52.19.1",
+    "@slidev/theme-default": "latest"
+  },
+  "packageManager": "pnpm@11.22.0"
+}
