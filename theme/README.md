@@ -16,7 +16,7 @@ Dark is the default (`colorSchema: dark`). Toggle light mode in the Slidev UI.
 
 | Layout | Notes |
 | --- | --- |
-| `cover` | Title slide, optional `background`, equalizer mark |
+| `cover` | Title slide, optional `background` |
 | `intro` | Opening slide with optional background |
 | `section` | Section divider |
 | `statement` | Centered claim |

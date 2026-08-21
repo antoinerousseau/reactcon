@@ -323,24 +323,3 @@
 .slidev-layout.two-columns {
   column-gap: 1.5rem;
 }
-
-.decibel-eq {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  height: 28px;
-  pointer-events: none;
-}
-
-.decibel-eq i {
-  display: block;
-  width: 4px;
-  border-radius: 99px;
-  background: var(--decibel-gradient);
-}
-
-.decibel-eq i:nth-child(1) { height: 10px; }
-.decibel-eq i:nth-child(2) { height: 20px; }
-.decibel-eq i:nth-child(3) { height: 14px; }
-.decibel-eq i:nth-child(4) { height: 28px; }
-.decibel-eq i:nth-child(5) { height: 16px; }
