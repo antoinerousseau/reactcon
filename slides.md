@@ -1,5 +1,6 @@
 ---
-theme: default
+theme: ./theme
+layout: cover
 background: https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1920&q=80
 class: text-center
 highlighter: shiki
@@ -14,7 +15,7 @@ mdc: true
 ### Offline-first ground operations in React Native
 
 <div class="pt-12">
-  <span @click="$slidev.nav.next" class="px-2 py-1 rounded cursor-pointer hover:bg-white hover:bg-opacity-10">
+  <span @click="$slidev.nav.next" class="px-3 py-2 rounded-sm cursor-pointer border border-white/20 hover:bg-white/10">
     Antoine Rousseau — Engineering Manager @ Shotgun <carbon-arrow-right class="inline-block" />
   </span>
 </div>
@@ -67,7 +68,11 @@ class: text-center
 
 Press-and-hold → QR → result overlay
 
-Valid. Already in. Still loading.
+<div class="flex justify-center gap-2 pt-4">
+  <Badge variant="positive">Valid</Badge>
+  <Badge variant="warning">Already in</Badge>
+  <Badge variant="informative">Still loading</Badge>
+</div>
 
 <!--
 Speaker Notes:
@@ -432,7 +437,7 @@ Speaker Notes:
 -->
 
 ---
-layout: center
+layout: end
 class: text-center
 ---
 

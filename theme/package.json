@@ -1,0 +1,34 @@
+{
+  "name": "slidev-theme-decibel",
+  "version": "0.1.0",
+  "description": "Slidev theme based on Shotgun's Decibel design system",
+  "author": "Shotgun",
+  "license": "UNLICENSED",
+  "keywords": [
+    "slidev-theme",
+    "slidev",
+    "decibel"
+  ],
+  "engines": {
+    "node": ">=20.12.0",
+    "slidev": ">=52.0.0"
+  },
+  "slidev": {
+    "colorSchema": "both",
+    "defaults": {
+      "colorSchema": "dark",
+      "transition": "slide-left",
+      "fonts": {
+        "sans": "Inter",
+        "mono": "JetBrains Mono",
+        "weights": "400,500,600,700"
+      },
+      "themeConfig": {
+        "primary": "#A78BFA"
+      }
+    }
+  },
+  "dependencies": {
+    "@slidev/types": "^52.19.1"
+  }
+}

@@ -1,0 +1,11 @@
+@font-face {
+  font-family: "Monument Extended";
+  src: url("./fonts/MonumentExtended-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --decibel-font-title: "Monument Extended", sans-serif;
+}

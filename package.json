@@ -8,8 +8,7 @@
     "export": "slidev export"
   },
   "dependencies": {
-    "@slidev/cli": "^52.19.1",
-    "@slidev/theme-default": "latest"
+    "@slidev/cli": "^52.19.1"
   },
   "packageManager": "pnpm@11.22.0"
 }

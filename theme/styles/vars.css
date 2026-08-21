@@ -1,0 +1,129 @@
+/**
+ * Decibel tokens, ported from @shotgun/decibel Backstage theme.
+ * Dark is the default (Backstage app); light is the html:not(.dark) set.
+ */
+
+:root {
+  --decibel-black: #000;
+  --decibel-white: #fff;
+
+  --decibel-violet-200: oklch(0.894 0.057 293.283);
+  --decibel-violet-400: oklch(0.702 0.183 293.541);
+  --decibel-violet-500: oklch(0.6056 0.2189 292.72);
+  --decibel-violet-600: oklch(0.5413 0.2466 293.01);
+  --decibel-violet-700: oklch(0.4907 0.2412 292.58);
+  --decibel-violet-800: oklch(0.432 0.232 292.759);
+  --decibel-violet-900: oklch(0.38 0.189 293.745);
+  --decibel-violet-950: oklch(0.283 0.141 291.089);
+
+  --decibel-cyan-400: oklch(0.789 0.154 211.53);
+  --decibel-cyan-500: oklch(0.715 0.143 215.221);
+
+  --decibel-red-400: oklch(0.704 0.191 22.216);
+  --decibel-red-600: oklch(0.577 0.245 27.325);
+  --decibel-red-700: oklch(0.505 0.213 27.518);
+  --decibel-red-950: oklch(0.258 0.092 26.042);
+
+  --decibel-green-400: oklch(0.792 0.209 151.711);
+  --decibel-green-500: oklch(0.723 0.219 149.579);
+  --decibel-green-600: oklch(0.627 0.194 149.214);
+  --decibel-green-700: oklch(0.527 0.154 150.069);
+
+  --decibel-amber-400: oklch(0.828 0.189 84.429);
+  --decibel-amber-600: oklch(0.666 0.179 58.318);
+
+  --decibel-sky-400: oklch(0.746 0.16 232.661);
+  --decibel-sky-600: oklch(0.588 0.158 241.966);
+
+  --decibel-dark-50: oklch(0.683 0 0);
+  --decibel-dark-100: oklch(0.64 0 0);
+  --decibel-dark-200: oklch(0.6 0 0);
+  --decibel-dark-300: oklch(0.556 0 0);
+  --decibel-dark-500: oklch(0.464 0 0);
+  --decibel-dark-600: oklch(0.42 0 0);
+  --decibel-dark-700: oklch(0.371 0 0);
+  --decibel-dark-800: oklch(0.321 0 0);
+  --decibel-dark-900: oklch(0.273 0 0);
+  --decibel-dark-950: oklch(0.222 0 0);
+
+  --decibel-light-300: oklch(0.725 0 0);
+  --decibel-light-600: oklch(0.845 0 0);
+  --decibel-light-800: oklch(0.925 0 0);
+  --decibel-light-900: oklch(0.961 0 0);
+
+  --decibel-radius-2xs: 4px;
+  --decibel-radius-xs: 8px;
+  --decibel-radius-sm: 12px;
+  --decibel-radius-md: 16px;
+  --decibel-radius-lg: 24px;
+
+  --decibel-gradient: linear-gradient(90deg, var(--decibel-cyan-400), var(--decibel-violet-600));
+
+  /* Light (Backstage light) */
+  --decibel-surface-primary: var(--decibel-white);
+  --decibel-surface-secondary: var(--decibel-light-900);
+  --decibel-surface-tertiary: var(--decibel-light-800);
+  --decibel-content-primary: var(--decibel-dark-950);
+  --decibel-content-secondary: var(--decibel-dark-500);
+  --decibel-content-tertiary: var(--decibel-dark-300);
+  --decibel-content-accent: var(--decibel-violet-600);
+  --decibel-content-negative: var(--decibel-red-600);
+  --decibel-content-warning: var(--decibel-amber-600);
+  --decibel-content-positive: var(--decibel-green-600);
+  --decibel-content-informative: var(--decibel-sky-600);
+  --decibel-fill-primary: var(--decibel-dark-950);
+  --decibel-fill-secondary: var(--decibel-light-800);
+  --decibel-fill-accent: var(--decibel-violet-500);
+  --decibel-fill-positive: var(--decibel-green-500);
+  --decibel-fill-negative: oklch(0.808 0.114 19.571);
+  --decibel-border-primary: var(--decibel-dark-950);
+  --decibel-border-secondary: oklch(0.725 0 0);
+  --decibel-border-tertiary: var(--decibel-light-600);
+  --decibel-border-quaternary: var(--decibel-light-900);
+
+  --slidev-theme-primary: var(--decibel-content-accent);
+  --slidev-code-background: var(--decibel-surface-secondary);
+  --slidev-code-foreground: var(--decibel-content-primary);
+  --slidev-code-radius: var(--decibel-radius-sm);
+  --slidev-code-padding: 16px;
+  --slidev-code-font-size: 13px;
+  --slidev-code-line-height: 20px;
+  --slidev-code-margin: 12px 0;
+  --slidev-code-tab-divider: var(--decibel-border-tertiary);
+  --slidev-code-tab-text-color: var(--decibel-content-tertiary);
+  --slidev-code-tab-active-text-color: var(--decibel-content-primary);
+  --slidev-slide-container-background: var(--decibel-surface-primary);
+  --slidev-controls-foreground: var(--decibel-content-primary);
+}
+
+html.dark {
+  --decibel-surface-primary: var(--decibel-dark-950);
+  --decibel-surface-secondary: var(--decibel-dark-900);
+  --decibel-surface-tertiary: var(--decibel-dark-800);
+  --decibel-content-primary: var(--decibel-white);
+  --decibel-content-secondary: var(--decibel-light-300);
+  --decibel-content-tertiary: var(--decibel-dark-100);
+  --decibel-content-accent: var(--decibel-violet-400);
+  --decibel-content-negative: var(--decibel-red-400);
+  --decibel-content-warning: var(--decibel-amber-400);
+  --decibel-content-positive: var(--decibel-green-400);
+  --decibel-content-informative: var(--decibel-sky-400);
+  --decibel-fill-primary: var(--decibel-white);
+  --decibel-fill-secondary: var(--decibel-dark-800);
+  --decibel-fill-accent: var(--decibel-violet-600);
+  --decibel-fill-positive: var(--decibel-green-700);
+  --decibel-fill-negative: var(--decibel-red-950);
+  --decibel-border-primary: var(--decibel-white);
+  --decibel-border-secondary: var(--decibel-dark-500);
+  --decibel-border-tertiary: var(--decibel-dark-600);
+  --decibel-border-quaternary: var(--decibel-dark-900);
+
+  --slidev-theme-primary: var(--decibel-content-accent);
+  --slidev-code-background: var(--decibel-surface-secondary);
+  --slidev-code-foreground: var(--decibel-content-primary);
+  --slidev-code-tab-divider: var(--decibel-border-tertiary);
+  --slidev-code-tab-text-color: var(--decibel-content-tertiary);
+  --slidev-code-tab-active-text-color: var(--decibel-content-primary);
+  --slidev-slide-container-background: var(--decibel-surface-primary);
+  --slidev-controls-foreground: var(--decibel-white);
+}
