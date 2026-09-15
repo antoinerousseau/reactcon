@@ -298,10 +298,34 @@
   .col-left,
   .col-right {
     min-width: 0;
+    min-height: 0;
     background: var(--decibel-surface-secondary);
     border: 1px solid var(--decibel-border-quaternary);
     border-radius: var(--decibel-radius-md);
     padding: 1.15rem 1.35rem;
+  }
+
+  .col-right:has(img) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .col-right:has(img) > * {
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .col-right img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
   }
 
   .col-left > *:first-child,

@@ -17,7 +17,7 @@ const props = defineProps({
     <div class="col-left" :class="props.class">
       <slot name="left" />
     </div>
-    <div class="col-right" :class="props.class">
+    <div v-click class="col-right" :class="props.class">
       <slot name="right" />
     </div>
     <div class="col-bottom" :class="props.class">
@@ -30,11 +30,16 @@ const props = defineProps({
 .two-cols-header {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
 }
 
 .col-header {
   grid-area: 1 / 1 / 2 / 3;
+}
+
+.col-left,
+.col-right {
+  min-height: 0;
 }
 
 .col-left {
