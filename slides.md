@@ -1,7 +1,7 @@
 ---
 theme: ./theme
 layout: cover
-background: ./images/marsatac.jpg
+background: /images/marsatac.jpg
 class: text-center
 highlighter: shiki
 lineNumbers: false
