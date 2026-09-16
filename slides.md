@@ -15,7 +15,7 @@ mdc: true
 ## Offline-first ground operations in React Native
 
 <div class="pt-12">
-    Antoine Rousseau — Engineering Manager @ Shotgun
+  Antoine Rousseau — Engineering Manager @ Shotgun
 </div>
 
 <!--
@@ -74,17 +74,10 @@ Press-and-hold → QR → result overlay
 
 </div>
 
-<div class="h-full aspect-[9/16] justify-self-end rounded-[var(--decibel-radius-lg)] border border-dashed border-[var(--decibel-border-secondary)] bg-[var(--decibel-surface-secondary)] flex items-center justify-center text-center px-3 text-[var(--decibel-content-tertiary)] text-sm leading-relaxed">
-
-Video placeholder<br>
-`public/scan-demo.mp4`
-
-<!--
-<SlidevVideo autoplay muted loop autoreset="slide" class="h-full w-full object-cover rounded-[var(--decibel-radius-lg)]">
-  <source src="/scan-demo.mp4" type="video/mp4" />
-</SlidevVideo>
--->
-
+<div class="rounded-[var(--decibel-radius-lg)] border border-dashed border-[var(--decibel-border-secondary)] overflow-hidden">
+  <SlidevVideo autoplay muted loop autoreset="slide">
+    <source src="./videos/scan.mp4" type="video/mp4" />
+  </SlidevVideo>
 </div>
 
 </div>
@@ -129,9 +122,9 @@ shotgun/
 
 <v-clicks>
 
-- Phone: Expo, `expo-router`, Uniwind, `expo-sqlite`
-- Wire: oRPC + Zod, typed as `APIClient` from the server
-- UUIDs created offline using ATProto's TIDs
+- Phone: Expo, [expo-router](https://docs.expo.dev/router/), [Uniwind](https://docs.uniwind.dev/) pro, [expo-sqlite](https://docs.expo.dev/versions/latest/sdk/sqlite/)
+- Wire: [oRPC](https://orpc.dev/) + [Zod](https://zod.dev/), typed as `APIClient` from the server
+- UUIDs created offline using ATProto's [TIDs](https://atproto.com/specs/tid)
 
 </v-clicks>
 
@@ -140,6 +133,7 @@ Speaker Notes:
 - This sits inside a larger Shotgun monorepo. For Backstage, these three packages are the contract.
 - Schema changes in packages/backstage break the app and the server at compile time.
 - Skip the library laundry list. They will see the pieces as we walk the scan.
+- TanStack query hooks.
 -->
 
 ---
@@ -154,7 +148,7 @@ Speaker Notes:
 4. **Transaction** writes `syncActions` + `scanLogs`
 5. **Overlay** immediately — staff already moved on
 6. **BLE mesh** broadcasts the scan log to nearby phones
-7. **Push** to the server every 5s, if we have a network
+7. **Push** to the server every few seconds, if we have a network
 
 </v-clicks>
 
@@ -176,7 +170,7 @@ Press-and-hold is the first cut. Battery is the rest.
 
 1. **Native session** — just opening the camera
 2. **Frame processor** — QR + barcode on every frame
-3. **The library** — `expo-camera` is fine so far; we'll measure others if it isn't
+3. **The library** — [expo-camera](https://docs.expo.dev/versions/latest/sdk/camera/) is fine so far; we'll measure others if it isn't
 
 </v-clicks>
 
@@ -278,46 +272,6 @@ Speaker Notes:
 -->
 
 ---
-layout: two-cols-header
----
-
-# Nearby gates: Bluetooth mesh
-
-Note: Bridgefy can crash. We may replace it with **`@shotgun/mesh`** — a BLE mesh library we vibe-coded.
-
-::left::
-
-### What it actually does
-
-- Broadcasts **scan logs**, not the whole DB
-- Peer upserts `scanLogs` + `syncActions`
-- Same UUID → ignore
-- Peers keep `syncedAt: null` and **can push too** — server dedupes on UUID
-
-::right::
-
-### The race we still have
-
-- Two gates, both offline, same ticket, same second
-- Mesh has not arrived yet
-- Both see `checked_in`
-- Server later keeps both UUIDs as scans
-
-*We don't invent a distributed lock*
-
-<!--
-Speaker Notes:
-- Be honest. This is the question you will get.
-- Why we own the mesh: Bridgefy sometimes crashes in the field. Stability > features. @shotgun/mesh is GATT writes + TTL gossip, small meshes (a handful of gates), inspired by BitChat. github.com/shotgun-warehouse/mesh
-- Mesh shrinks the window. It does not close it. Bluetooth range, permissions, no distributed lock.
-- The handler comment "only the original device can push" is stale: we broadcast immediately with syncedAt null, so any online peer's 5s outbox flush will call syncActions.push. Server skips if that UUID already exists.
-- That's useful: if the scanning phone never reconnects, a neighbor can still deliver the scan.
-- Local decideScan uses scanLogs: once the mesh packet arrives, the next scan at gate B is already_checked_in.
-- We accept a small double-scan window over blocking the door. Say that sentence.
-- Android needs Bluetooth + location permissions. Simulator is a no-op.
--->
-
----
 
 # Types across the wire
 
@@ -346,6 +300,46 @@ Speaker Notes:
 -->
 
 ---
+layout: two-cols-header
+---
+
+# Nearby scanners: Bluetooth mesh
+
+Note: Bridgefy can crash. We may replace it with **`@shotgun/mesh`** — a BLE mesh library we vibe-coded.
+
+::left::
+
+### What it actually does
+
+- Broadcasts **sync actions**, not the whole DB
+- Peer upserts `syncActions` (and its entities if any, like `scanLogs`)
+- Same UUID → ignore
+- Peers keep `syncedAt: null` and **can push too** — server dedupes on UUID
+
+::right::
+
+### The race we still have
+
+- Two gates, both offline, same valid ticket, same second
+- Mesh has not arrived yet
+- Both scans validate (`scan` sync action & `checked_in` result)
+- Server later keeps both logs (different UUIDs)
+
+*We don't invent a distributed lock*
+
+<!--
+Speaker Notes:
+- Be honest. This is the question you will get.
+- Why we own the mesh: Bridgefy sometimes crashes in the field. Stability > features. @shotgun/mesh is GATT writes + TTL gossip, small meshes (a handful of gates), inspired by BitChat. github.com/shotgun-warehouse/mesh
+- Mesh shrinks the window. It does not close it. Bluetooth range, permissions, no distributed lock.
+- The handler comment "only the original device can push" is stale: we broadcast immediately with syncedAt null, so any online peer's 5s outbox flush will call syncActions.push. Server skips if that UUID already exists.
+- That's useful: if the scanning phone never reconnects, a neighbor can still deliver the scan.
+- Local decideScan uses scanLogs: once the mesh packet arrives, the next scan at gate B is already_checked_in.
+- We accept a small double-scan window over blocking the door. Say that sentence.
+- Android needs Bluetooth + location permissions. Simulator is a no-op.
+-->
+
+---
 
 # Tap to Pay
 
@@ -353,23 +347,16 @@ Speaker Notes:
 
 <div>
 
-Phone → tap → paid
+Phone → tap → paid → share ticket
 
 `stripe-terminal-react-native`
 
 </div>
 
-<div class="h-full aspect-[9/16] justify-self-end rounded-[var(--decibel-radius-lg)] border border-dashed border-[var(--decibel-border-secondary)] bg-[var(--decibel-surface-secondary)] flex items-center justify-center text-center px-3 text-[var(--decibel-content-tertiary)] text-sm leading-relaxed">
-
-Video placeholder<br>
-`public/tap-demo.mp4`
-
-<!--
-<SlidevVideo autoplay muted loop autoreset="slide" class="h-full w-full object-cover rounded-[var(--decibel-radius-lg)]">
-  <source src="/tap-demo.mp4" type="video/mp4" />
-</SlidevVideo>
--->
-
+<div class="rounded-[var(--decibel-radius-lg)] border border-dashed border-[var(--decibel-border-secondary)] overflow-hidden">
+  <SlidevVideo autoplay muted loop autoreset="slide">
+    <source src="./videos/taptopay.mp4" type="video/mp4" />
+  </SlidevVideo>
 </div>
 
 </div>
@@ -606,10 +593,9 @@ class: text-center
 
 ### Questions
 
-**Antoine Rousseau**
-Engineering Manager @ Shotgun
-
-[github.com/shotgun-warehouse/shotgun](https://github.com/shotgun-warehouse/shotgun)
+<div class="pt-12">
+  Antoine Rousseau — Engineering Manager @ Shotgun
+</div>
 
 <!--
 Speaker Notes:
