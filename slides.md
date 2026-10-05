@@ -310,25 +310,27 @@ Speaker Notes:
 -->
 
 ---
+
+# Nearby scanners: one scan, two phones
+
+<MeshSyncDiagram />
+
+<!--
+Speaker Notes:
+- Click through it. 1: Gate A commits locally, same transaction as always (syncActions + scanLogs, syncedAt null). The door is already done.
+- 2: fire-and-forget broadcast through Bridgefy, no internet needed. We only send the sync action, never the DB. On success A stamps broadcastedAt; failure does not roll back the scan.
+- 3: Gate B looks the UUID up in syncActions. Known → return. Unknown → one transaction: upsert the scan log and the sync action (syncedAt stays whatever it was, null).
+- 4: payoff. decideScan reads local scanLogs, so the next scan of that ticket at B is already_checked_in. No server involved.
+- 5: independent track. Every 5s each phone pushes rows with syncedAt null. B holds a copy too, so if A never reconnects, B delivers the scan.
+- 6: server dedupes on UUID, so two phones pushing the same action is harmless.
+- Source: apps/backstage/src/providers/mesh (use-sync-action, handlers/index, listeners/did-receive-data).
+-->
+
+---
 layout: two-cols-header
 ---
 
-# Nearby scanners: Bluetooth mesh
-
-Note: Bridgefy can crash. We may replace it with **`@shotgun/mesh`** — a BLE mesh library we vibe-coded.
-
-::left::
-
-### What it actually does
-
-- Broadcasts **sync actions**, not the whole DB
-- Peer upserts `syncActions` (and its entities if any, like `scanLogs`)
-- Same UUID → ignore
-- Peers keep `syncedAt: null` and **can push too** — server dedupes on UUID
-
-::right::
-
-### The race we still have
+# Nearby scanners: the race we still have
 
 - Two gates, both offline, same valid ticket, same second
 - Mesh has not arrived yet
@@ -336,6 +338,10 @@ Note: Bridgefy can crash. We may replace it with **`@shotgun/mesh`** — a BLE m
 - Server later keeps both logs (different UUIDs)
 
 *We don't invent a distributed lock*
+
+::bottom::
+
+Note: for now we use [Bridgefy](https://github.com/bridgefy/bridgefy-react-native), but it can sometimes crash so we will replace it with **[`@shotgun/mesh`](https://github.com/shotgun-warehouse/mesh)** — a simpler BLE mesh library we vibe-coded.
 
 <!--
 Speaker Notes:
