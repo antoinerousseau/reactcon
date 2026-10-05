@@ -18,9 +18,9 @@ Antoine Rousseau — Engineering Manager @ Shotgun
 <!--
 Speaker Notes:
 - ReactCon Berlin. 30 minutes, then 10 for questions.
-- Shotgun Backstage is the app organizers use on D-Day: scan tickets at the door, sell on site, see live event data.
-- Constraint: a 5-second freeze at the gate spills the queue onto the street. Internet is optional.
-- Today we follow one scan through the architecture — not a tour of the npm list.
+- Backstage is the app organizers use on D-Day: scan tickets, sell on site, live event data.
+- Constraint: a 5-second freeze at the gate puts the queue on the street. Internet is optional.
+- We follow one scan through the architecture, not the npm list.
 -->
 
 ---
@@ -49,8 +49,8 @@ layout: two-cols-header
 
 <!--
 Speaker Notes:
-- Paint the room: dark, loud, drunk attendees, bouncers with gloves.
-- We do not optimize for pretty dashboards. We optimize for "is this person allowed in, right now."
+- Paint the room: dark, loud, bouncers with gloves.
+- We optimize for "is this person allowed in, right now", not for dashboards.
 -->
 
 ---
@@ -75,10 +75,10 @@ Press-and-hold → QR → result overlay
 
 <!--
 Speaker Notes:
-- Play the recording (or live demo if the device is ready). 60–90 seconds max.
-- Ask them to watch three things: you hold to open the camera (not always-on), the result is full-screen, there is no spinner waiting on the network.
+- Play the recording (or live demo). 60-90 seconds max.
+- Point out: hold to open the camera, full-screen result, no spinner.
 - Then: "that overlay did not wait for our API."
-- Tap to Pay has its own demo later — don't play it here.
+- Tap to Pay has its own demo later. Don't play it here.
 -->
 
 ---
@@ -96,8 +96,8 @@ The server is how we catch up — later.
 <!--
 Speaker Notes:
 - This is the whole talk in one sentence.
-- TanStack Query is the reactive layer on top of SQLite, not the cache of a REST call we make at scan time.
-- If the ticket is not in the local DB yet, we say still_loading. We do not guess.
+- TanStack Query reads from SQLite. It is not caching a REST call made at scan time.
+- Ticket not in the local DB yet: still_loading. We never guess.
 -->
 
 ---
@@ -123,10 +123,8 @@ shotgun/
 
 <!--
 Speaker Notes:
-- This sits inside a larger Shotgun monorepo. For Backstage, these three packages are the contract.
-- Schema changes in packages/backstage break the app and the server at compile time.
-- Skip the library laundry list. They will see the pieces as we walk the scan.
-- TanStack query hooks.
+- These three packages are the contract. A schema change in packages/backstage breaks the app and the server at compile time.
+- Skip the library list. The pieces show up as we walk the scan.
 -->
 
 ---
@@ -148,9 +146,9 @@ Speaker Notes:
 <!--
 Speaker Notes:
 - Spend time here. This is the architecture.
-- Serial mutation scope { id: "scan" } so two rapid QR reads do not interleave.
-- Mesh and server push are asynchronous. The bouncer does not wait.
-- Next slides zoom into 1 (camera battery), 3, 4, 6, and 7.
+- Serial mutation scope { id: "scan" }: two rapid QR reads don't interleave.
+- Mesh and server push are asynchronous. The bouncer doesn't wait.
+- Next: camera (1), decideScan (3), write locally (4), then server catch-up (7) and mesh (6).
 -->
 
 ---
@@ -173,9 +171,9 @@ Press-and-hold is the first cut. Battery is the rest.
 
 <!--
 Speaker Notes:
-- Always-on camera was the obvious killer. Press-and-hold also prevents accidental scans with gloves / in a pocket.
-- Even while held open, cost splits three ways: the hardware session, the JS/native frame pipeline looking for codes, and whichever camera library wraps it.
-- expo-camera is the current pick because it behaves. If traces say it isn't battery-savvy enough, we measure alternatives — we have not crowned a winner.
+- Always-on camera was the battery killer. Press-and-hold also prevents accidental scans (gloves, pockets).
+- Even while held open: the native session, the frame processor, the library.
+- expo-camera for now. We'd measure alternatives if traces say so. No winner crowned.
 -->
 
 ---
@@ -193,10 +191,10 @@ export type ScanDecision =
 
 <!--
 Speaker Notes:
-- 12 decisions, not a boolean. Access lists, time windows, resales, verification warnings.
-- still_loading: ticket not in SQLite yet, and we know the pull is incomplete. Staff wait. That is the correct UX.
-- unknown: we believe we have the full dataset and this code is not in it.
-- already_checked_in looks at local scanLogs — including logs that arrived over mesh from another gate.
+- 12 decisions, not a boolean: access lists, time windows, resales, verification warnings.
+- still_loading: ticket not in SQLite and the pull is incomplete. Staff wait.
+- unknown: pull is complete and the code isn't in it.
+- already_checked_in reads local scanLogs, including ones that arrived over mesh.
 - Force check-in is a permission, not a default.
 -->
 
@@ -226,10 +224,10 @@ The door is done. Sync is an outbox.
 
 <!--
 Speaker Notes:
-- Outbox pattern: the scan is committed on device before anyone else knows.
-- syncedAt null means "not on the server yet." A 5-second interval pushes pending rows.
-- broadcastedAt tracks mesh. Failure to broadcast does not roll back the scan.
-- TID gives us sortable, unique IDs with no server round-trip.
+- Outbox: the scan is committed on the device before anyone else knows.
+- syncedAt null = not on the server yet. A 5-second interval pushes pending rows.
+- broadcastedAt tracks the mesh. A failed broadcast doesn't roll back the scan.
+- TIDs: sortable, unique IDs with no server round-trip.
 -->
 
 ---
@@ -242,7 +240,7 @@ The door is done. Everything after this is bookkeeping.
 
 <!--
 Speaker Notes:
-- Transition slide. Breathe here.
+- Transition. Breathe.
 - Everything so far happened on one phone with no network. Now we reconcile.
 -->
 
@@ -256,11 +254,11 @@ Events, tickets, deals, scan logs, orders, transfers…
 
 ::left::
 
-### Pull — 18 entity streams
+### Pull — 16 entity streams
 
 - Keyset cursor: `(updatedAt, id)`
 - Pages of 2,000
-- Full page: again in **1s**. Short page: wait **10s**
+- Full page: again in **1s**. Short page: back to **~10s**
 
 ::right::
 
@@ -273,12 +271,12 @@ Events, tickets, deals, scan logs, orders, transfers…
 
 <!--
 Speaker Notes:
-- Split routers, not one giant sync blob. Legacy lastUpdatedAt endpoint still exists; current clients do not use it.
-- A full page of 2,000 means "there is more" — we tighten to 1s so first launch and a long offline stretch drain quickly. A short page means we are current; 10s is enough.
-- New phone: cursor is null, but still 2k pages. The whole event arrives as many full pages, not one response.
-- Keyset is (updatedAt, id) as strings — Postgres microseconds vs JS Date. Skip that unless someone asks; wrong cursor skips or duplicates rows.
-- Push is independent of pull. No network? The 5s tick no-ops. Rows stay syncedAt null.
-- Invalid payloads are dropped per-item on the server — the rest of the batch still applies.
+- Split endpoints, not one sync blob. The old monolithic sync endpoint is only for old clients.
+- Full page (2,000) means there's more: poll again in 1s. Short page means we're current: back to steady polling (10s for most streams, slower for rarely-changing ones).
+- New phone: no cursor, so the whole event arrives as many full pages.
+- Cursor is (updatedAt, id). Skip the details unless asked.
+- Push is independent of pull. Offline: sync is paused and rows stay syncedAt null.
+- Server handles each action on its own: invalid ones are dropped, known UUIDs are skipped, the rest apply.
 -->
 
 ---
@@ -304,9 +302,9 @@ Same router type on phone and server. Old binaries get `406` → `/outdated-vers
 
 <!--
 Speaker Notes:
-- oRPC because we wanted end-to-end TypeScript without maintaining an OpenAPI client.
-- GraphQL in this app is only Expo's API, for listing EAS channels.
-- x-app-version: we force upgrades before D-Day rather than debug three app versions in a basement.
+- oRPC: end-to-end TypeScript without maintaining an OpenAPI client.
+- GraphQL is only on the server, to list EAS channels from Expo's API.
+- x-app-version: we force upgrades rather than debug three app versions in a basement.
 -->
 
 ---
@@ -317,13 +315,13 @@ Speaker Notes:
 
 <!--
 Speaker Notes:
-- Click through it. 1: Gate A commits locally, same transaction as always (syncActions + scanLogs, syncedAt null). The door is already done.
-- 2: fire-and-forget broadcast through Bridgefy, no internet needed. We only send the sync action, never the DB. On success A stamps broadcastedAt; failure does not roll back the scan.
-- 3: Gate B looks the UUID up in syncActions. Known → return. Unknown → one transaction: upsert the scan log and the sync action (syncedAt stays whatever it was, null).
-- 4: payoff. decideScan reads local scanLogs, so the next scan of that ticket at B is already_checked_in. No server involved.
-- 5: independent track. Every 5s each phone pushes rows with syncedAt null. B holds a copy too, so if A never reconnects, B delivers the scan.
-- 6: server dedupes on UUID, so two phones pushing the same action is harmless.
-- Source: apps/backstage/src/providers/mesh (use-sync-action, handlers/index, listeners/did-receive-data).
+Click through:
+1. Gate A commits locally: syncActions + scanLogs, syncedAt null. The door is already done.
+2. Broadcast via Bridgefy, no internet. Only the sync action goes out, never the DB. On success A stamps broadcastedAt.
+3. Gate B looks up the UUID. Known: ignore. Unknown: upsert the scan log and the sync action in one transaction.
+4. Payoff: decideScan reads local scanLogs, so the next scan of that ticket at B is already_checked_in. No server.
+5. Separate track: every 5s each phone pushes rows with syncedAt null. B has a copy too, so if A never reconnects, B delivers the scan.
+6. Server dedupes on UUID: two phones pushing the same action is harmless.
 -->
 
 ---
@@ -346,13 +344,10 @@ Note: for now we use [Bridgefy](https://github.com/bridgefy/bridgefy-react-nativ
 <!--
 Speaker Notes:
 - Be honest. This is the question you will get.
-- Why we own the mesh: Bridgefy sometimes crashes in the field. Stability > features. @shotgun/mesh is GATT writes + TTL gossip, small meshes (a handful of gates), inspired by BitChat. github.com/shotgun-warehouse/mesh
-- Mesh shrinks the window. It does not close it. Bluetooth range, permissions, no distributed lock.
-- The handler comment "only the original device can push" is stale: we broadcast immediately with syncedAt null, so any online peer's 5s outbox flush will call syncActions.push. Server skips if that UUID already exists.
-- That's useful: if the scanning phone never reconnects, a neighbor can still deliver the scan.
-- Local decideScan uses scanLogs: once the mesh packet arrives, the next scan at gate B is already_checked_in.
-- We accept a small double-scan window over blocking the door. Say that sentence.
-- Android needs Bluetooth + location permissions. Simulator is a no-op.
+- The mesh shrinks the window, it doesn't close it: Bluetooth range, permissions, no distributed lock.
+- Say this sentence: we accept a small double-scan window over blocking the door.
+- Why own the mesh: Bridgefy crashes in the field. @shotgun/mesh is GATT writes + TTL gossip for small meshes, inspired by BitChat.
+- Android needs Bluetooth + location permissions. The simulator is a no-op.
 -->
 
 ---
@@ -366,8 +361,8 @@ Selling, printing, permissions, and keeping it all observable.
 
 <!--
 Speaker Notes:
-- Transition. The scan path is done — this is everything else the door staff touch.
-- If you are running long, this is where you start cutting.
+- Transition. The scan path is done. This is everything else door staff touch.
+- Running long? Start cutting here.
 -->
 
 ---
@@ -389,10 +384,10 @@ Phone → tap → paid → share ticket
 
 <!--
 Speaker Notes:
-- Same beat as the scan: the phone is the terminal. No dedicated POS hardware.
-- Stripe Terminal (`@stripe/stripe-terminal-react-native`) does the payment. Cash / card / Pix are permission-gated too.
-- Retry on session expiry mid-event — don't dwell unless asked.
-- Native Expo module (IosTapToPay) only presents Apple's ProximityReaderDiscovery "how to tap" sheet. Stripe does the rest.
+- Same beat as the scan: the phone is the terminal. No POS hardware.
+- Stripe Terminal handles payment. Cash, card and Pix are permission-gated.
+- Our native Expo module (IosTapToPay) only shows Apple's "how to tap" sheet. Stripe does the rest.
+- Session expiry mid-event: reconnect and retry. Don't dwell unless asked.
 -->
 
 ---
@@ -420,10 +415,10 @@ uncertain outcomes. The sale is done; the print is catch-up.
 
 <!--
 Speaker Notes:
-- Skia so layout is ours, not ESC/POS templates.
-- Queue lives on device — same offline-first instinct as scans.
-- Pairing and test print live in settings. After that, a successful sale enqueues a print; cash sales also kick the drawer.
-- Organizers already have iPhones and Pixels. The Star printer is the only extra hardware at the till.
+- Skia so the ticket layout is ours, not ESC/POS templates.
+- The queue lives on the device: same offline-first instinct as scans.
+- Pairing and test print are in settings. After a sale a print is enqueued; cash sales can open the drawer.
+- The Star printer is the only extra hardware at the till.
 -->
 
 ---
@@ -453,10 +448,10 @@ Roles are a default. Events override.
 
 <!--
 Speaker Notes:
-- A bartender should sell cash and not refund last night's online sales.
-- A door person may only scan, and may not force check-in.
-- Cohosts inherit a subset. Per-event overrides live in eventMemberPermissionOverrides.
-- Offline: we still gate the UI from the last synced permission set. Writes go through the outbox and the server will reject them if the token is not allowed.
+- A bartender sells cash but doesn't refund last night's online sales.
+- A door person scans, but can't force check-in.
+- Per-event overrides live in eventMemberPermissionOverrides.
+- Offline, the UI uses the last synced permissions. The server checks again on every call.
 -->
 
 ---
@@ -488,10 +483,10 @@ debug screen.
 
 <!--
 Speaker Notes:
-- Runtime version follows appVersion. JS-only PRs are OTA; native changes still need a binary.
-- Preview environment only — production staff do not see this menu.
-- This is how we test scan + Tap to Pay on real hardware the week of the event without a TestFlight per PR.
-- If time is short, this is the slide to skip. The scan path is not.
+- Runtime version follows appVersion: JS-only PRs go OTA, native changes need a new binary.
+- Preview only. Production staff never see this menu.
+- That's how we test scan + Tap to Pay on real hardware the week of the event, without a TestFlight per PR.
+- Short on time? Skip this one. The scan path is not skippable.
 -->
 
 ---
@@ -530,14 +525,13 @@ Login, ticketing, sell. Not the camera. Yet.
 
 <!--
 Speaker Notes:
-- backstage-server: vitest + call() from @orpc/server. Same procedures the app uses.
-- Isolation is withTransaction: one Postgres transaction per file, a savepoint per test, both rolled back. The DB is real; the writes do not stick.
-- syncActions.push is the important one here: succeeded scan sets redeemedAt, UUID is idempotent, a bad item does not fail the batch.
-- evaluateScan / decideScan is also Vitest — on the client, ~800 lines, no DB. Don't mix it into the API column unless asked.
-- Maestro: login → pick seeded event → create a ticket → cash sale → logout. testIDs, not screenshots.
-- CI: EAS workflow on main. Seed an isolated event, iOS e2e build, maestro job (retries: 2), teardown.
-- Camera scan is not in Maestro. Press-and-hold + lighting + hardware. Channel surfing is how we QA that on a real phone.
-- If you skipped channel surfing, skip this too.
+- API: Vitest + call() from @orpc/server. Same procedures the app hits. Real Postgres, each test in a savepoint that's rolled back.
+- syncActions.push is the key test: UUID is idempotent, a bad item doesn't fail the batch, a succeeded scan sets redeemedAt.
+- decideScan / evaluateScan: Vitest on the client (~850 lines of tests), no DB. Don't mix it into the API column unless asked.
+- Maestro: login, seeded event, create a ticket, cash sale, logout. testIDs, not screenshots.
+- CI: EAS workflow on main: seed an event, iOS e2e build, Maestro (2 retries), teardown.
+- Camera scan isn't in Maestro (press-and-hold, lighting, hardware). Channel surfing is how we QA that.
+- Skipped channel surfing? Skip this too.
 -->
 
 ---
@@ -555,11 +549,12 @@ A freeze or a crash is a problem. A network error is not.
 ```typescript
 Sentry.init({
   ignoreErrors: [NETWORK_ERROR_MESSAGE_REGEX],
-  tracesSampleRate: preview ? 1 : 0,
+  tracesSampleRate: 1,
+  enableLogs: true,
 })
 ```
 
-*No perf traces in production. Battery, not dashboards.*
+*Traces and logs run in production too.*
 
 ::right::
 
@@ -568,17 +563,16 @@ Sentry.init({
 - Error boundary: toast, then retry
 - Tag `git_hash` — which OTA
 - Tag `context` + `action` — Scan, Mesh, Stripe
-- Logs in preview only
 
 <!--
 Speaker Notes:
-- ignoreErrors: cellular dying is the product constraint. Do not page on fetch failed.
-- GlobalErrorWatcher: network errors are swallowed. Anything else toasts and captureException. In prod we do not rethrow into the default handler — that would take down the JS runtime at the door.
-- tracesSampleRate 0 in production: tracing is CPU + network. Preview gets 100%. enableLogs is preview-only too.
-- git_hash is EXPO_PUBLIC_GIT_HASH. Same story as channel surfing: you know which PR is on the phone.
-- reportError(context, action) is how Stripe, mesh, scan, migrations land in Sentry with tags.
+- ignoreErrors: cellular dying is the product constraint. Don't page on "fetch failed".
+- GlobalErrorWatcher: network errors are swallowed; anything else toasts and goes to Sentry. In prod we don't call the default handler: it would take down the JS runtime at the door.
+- Traces (100%) and logs are on in production too, since late September.
+- git_hash = EXPO_PUBLIC_GIT_HASH: you know which build is on the phone.
+- reportError(context, action) is how Stripe, mesh and scan errors get their tags.
 - Sentry.wrap(RootLayout) + wrapExpoRouterErrorBoundary: retry, not a white screen.
-- If time is short, skip with the testing slide.
+- Short on time? Skip with the testing slide.
 -->
 
 ---
@@ -609,8 +603,8 @@ Monorepo + oRPC + Zod.
 
 <!--
 Speaker Notes:
-- Leave this up. Walk the three cards slowly.
-- Invite questions on: the remaining double-scan window, mesh vs Bridgefy, camera battery, printing, Expo modules, permissions, testing, Sentry.
+- Leave this up and walk the three cards slowly.
+- Invite questions: the double-scan window, mesh vs Bridgefy, camera battery, printing, Expo modules, permissions, testing, Sentry.
 -->
 
 ---
@@ -625,11 +619,10 @@ Antoine Rousseau — Engineering Manager @ Shotgun
 
 <!--
 Speaker Notes:
-- 10 minutes Q&A.
-- Likely questions:
-  - Double-scan: UUID idempotency + local scanLogs. Window exists before mesh/server. We chose door speed.
-  - Battery: press-and-hold first. Then native camera session + QR/barcode frame processor + the library (expo-camera today). Mesh scan+advertise is still expensive.
-  - Mesh: Bridgefy crashed in the field. In-house @shotgun/mesh — GATT gossip, small meshes, we own the crashes.
+- 10 minutes of Q&A. Likely questions:
+  - Double-scan: UUID idempotency + local scanLogs. The window exists before mesh/server. We chose door speed.
+  - Battery: press-and-hold first, then the camera session, frame processor and library (expo-camera today).
+  - Mesh: Bridgefy crashed in the field. In-house @shotgun/mesh: GATT gossip, small meshes, we own the crashes.
   - Conflict UI: none. Staff see already_checked_in from local logs.
   - Printing: Star thermal printers, Skia-rendered tickets, local queue. On-site tickets, not PDF-only.
   - Testing: Vitest on decideScan and oRPC; Maestro covers login/sell/ticketing, not camera scan (yet).
