@@ -1,4 +1,9 @@
 <script setup lang="ts">
+/**
+ * Status pill. The template palette has no red/green, so the four accent
+ * colours carry the semantics: teal reads positive, peach cautionary,
+ * pink negative.
+ */
 withDefaults(defineProps<{
   variant?: 'default' | 'accent' | 'positive' | 'negative' | 'warning' | 'informative'
 }>(), {
@@ -7,53 +12,48 @@ withDefaults(defineProps<{
 </script>
 
 <template>
-  <span class="decibel-badge" :data-variant="variant">
+  <span class="sg-badge" :data-variant="variant">
     <slot />
   </span>
 </template>
 
 <style scoped>
-.decibel-badge {
+.sg-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.15rem 0.5rem;
-  border-radius: var(--decibel-radius-2xs);
-  font-size: 0.75rem;
-  font-weight: 500;
-  line-height: 1.25;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: var(--sg-radius);
+  font-size: var(--sg-note-size);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0;
   white-space: nowrap;
-  border: 1px solid transparent;
 }
 
-.decibel-badge[data-variant='default'] {
-  background: var(--decibel-fill-secondary);
-  color: var(--decibel-content-secondary);
+.sg-badge[data-variant='default'] {
+  background: var(--sg-surface-raised);
+  color: var(--sg-content-secondary);
 }
 
-.decibel-badge[data-variant='accent'] {
-  background: color-mix(in oklch, var(--decibel-fill-accent) 22%, transparent);
-  color: var(--decibel-content-accent);
-  border-color: var(--decibel-fill-accent);
+.sg-badge[data-variant='accent'],
+.sg-badge[data-variant='positive'] {
+  background: color-mix(in srgb, var(--sg-teal) 18%, transparent);
+  color: var(--sg-teal);
 }
 
-.decibel-badge[data-variant='positive'] {
-  background: color-mix(in oklch, var(--decibel-content-positive) 16%, transparent);
-  color: var(--decibel-content-positive);
+.sg-badge[data-variant='warning'] {
+  background: color-mix(in srgb, var(--sg-peach) 18%, transparent);
+  color: var(--sg-peach);
 }
 
-.decibel-badge[data-variant='negative'] {
-  background: var(--decibel-fill-negative);
-  color: var(--decibel-content-negative);
+.sg-badge[data-variant='negative'] {
+  background: color-mix(in srgb, var(--sg-pink) 18%, transparent);
+  color: var(--sg-pink);
 }
 
-.decibel-badge[data-variant='warning'] {
-  background: color-mix(in oklch, var(--decibel-content-warning) 16%, transparent);
-  color: var(--decibel-content-warning);
-}
-
-.decibel-badge[data-variant='informative'] {
-  background: color-mix(in oklch, var(--decibel-content-informative) 16%, transparent);
-  color: var(--decibel-content-informative);
+.sg-badge[data-variant='informative'] {
+  background: color-mix(in srgb, var(--sg-periwinkle) 18%, transparent);
+  color: var(--sg-periwinkle);
 }
 </style>

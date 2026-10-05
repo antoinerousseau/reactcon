@@ -1,349 +1,486 @@
+/**
+ * Typography and shared slide chrome.
+ *
+ * All sizes are Figma artboard pixels (canvasWidth: 1920). Slidev scales the
+ * whole slide to the viewport, so px here is a 1:1 match with the design.
+ *
+ * Layout-specific geometry lives in the individual layout components; this
+ * file owns the things that style markdown coming through a <slot>.
+ */
+
 .slidev-layout {
   position: relative;
-  background: var(--decibel-surface-primary);
-  color: var(--decibel-content-primary);
-  font-weight: 400;
+  overflow: hidden;
+  box-sizing: border-box;
+  height: 100%;
+  background: var(--sg-surface);
+  color: var(--sg-content-primary);
+  font-family: var(--sg-font-sans);
+  font-size: var(--sg-body-3-size);
+  font-weight: 500;
+  line-height: 1.34;
+  letter-spacing: -0.005em;
+  padding: var(--sg-margin-top) var(--sg-margin-x) 160px;
 
+  /* Slide title — "H2" in the template: Space Grotesk Bold 48 */
   h1 {
-    font-family: var(--decibel-font-title);
-    font-size: 2rem;
-    font-weight: 900;
-    letter-spacing: 0.02em;
-    line-height: 1.15;
-    margin-bottom: 0.85rem;
-    color: var(--decibel-content-primary);
-    text-transform: uppercase;
-  }
-
-  h1 code {
-    text-transform: none;
-    letter-spacing: 0;
-  }
-
-  h2 {
-    font-size: 1.5rem;
-    font-weight: 500;
+    font-size: var(--sg-h2-size);
+    font-weight: 700;
+    line-height: 1.2;
     letter-spacing: -0.02em;
-    line-height: 1.25;
-    color: var(--decibel-content-primary);
+    color: var(--sg-content-primary);
+    margin-bottom: 48px;
+  }
+
+  /* "H3 Medium" — the heading of a text block */
+  h2 {
+    font-size: var(--sg-h3-size);
+    font-weight: 700;
+    line-height: 1.32;
+    letter-spacing: -0.02em;
+    color: var(--sg-content-primary);
+    margin-bottom: 16px;
   }
 
   h3 {
-    font-size: 1.25rem;
-    font-weight: 500;
-    letter-spacing: -0.015em;
-    line-height: 1.3;
-    color: var(--decibel-content-primary);
+    font-size: var(--sg-h3-size);
+    font-weight: 700;
+    line-height: 1.32;
+    letter-spacing: -0.02em;
+    color: var(--sg-content-primary);
+    margin-bottom: 24px;
   }
 
   h4 {
-    font-size: 1.125rem;
-    font-weight: 500;
+    font-size: var(--sg-body-2-size);
+    font-weight: 700;
+    line-height: 1.36;
+    letter-spacing: -0.01em;
   }
 
-  h5 {
-    font-size: 1rem;
-    font-weight: 500;
-  }
-
+  /* Eyebrow / kicker */
   h6 {
-    font-size: 0.75rem;
+    font-size: var(--sg-note-size);
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--decibel-content-accent);
-    opacity: 1;
+    color: var(--sg-content-accent);
+    margin-bottom: 16px;
     padding-top: 0;
-    margin-bottom: 0.5rem;
+    opacity: 1;
   }
 
-  h1 + p {
-    margin-top: -0.35rem;
-    margin-bottom: 1.25rem;
-    color: var(--decibel-content-secondary);
-    opacity: 1;
-    font-size: 1.125rem;
-    font-weight: 400;
+  p,
+  li {
+    color: var(--sg-content-secondary);
   }
 
   p {
-    color: var(--decibel-content-primary);
+    margin: 16px 0;
   }
 
-  p + h2,
-  ul + h2,
-  table + h2 {
-    margin-top: 2rem;
+  /* A lone sentence straight under the slide title acts as a standfirst */
+  h1 + p {
+    margin-top: -24px;
+    margin-bottom: 40px;
+    font-size: var(--sg-body-2-size);
+    line-height: 1.36;
+    letter-spacing: -0.01em;
   }
 
   ul {
-    list-style: disc;
+    list-style: none;
+    padding-left: 0;
   }
 
   ol {
-    list-style: decimal;
-  }
-
-  li::marker {
-    color: var(--decibel-content-accent);
+    list-style: none;
+    counter-reset: sg-step;
+    padding-left: 0;
   }
 
   li {
-    color: var(--decibel-content-primary);
+    position: relative;
+    padding-left: 44px;
+    margin: 20px 0;
   }
 
-  a {
-    color: var(--decibel-content-accent);
-    border-bottom-color: color-mix(in oklch, var(--decibel-content-accent) 45%, transparent);
+  ul > li::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 13px;
+    width: 14px;
+    height: 2px;
+    background: var(--sg-content-accent);
   }
 
-  a:hover {
-    color: var(--decibel-violet-200);
-    border-bottom-style: solid;
+  ol > li {
+    counter-increment: sg-step;
+  }
+
+  ol > li::before {
+    content: counter(sg-step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: var(--sg-note-size);
+    font-weight: 700;
+    line-height: 1.6;
+    color: var(--sg-content-accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  li > ul,
+  li > ol {
+    margin: 8px 0;
   }
 
   b,
   strong {
-    font-weight: 600;
-    color: var(--decibel-content-primary);
+    font-weight: 700;
+    color: var(--sg-content-primary);
   }
 
+  em {
+    font-style: italic;
+    color: var(--sg-content-secondary);
+  }
+
+  a {
+    color: var(--sg-content-accent);
+    border-bottom: 1px solid rgb(70 236 213 / 35%);
+    text-decoration: none;
+  }
+
+  a:hover {
+    border-bottom-color: var(--sg-content-accent);
+  }
 
   blockquote {
-    background: var(--decibel-surface-secondary);
-    color: var(--decibel-content-secondary);
-    border-left: 3px solid var(--decibel-fill-accent);
-    border-radius: 0 var(--decibel-radius-sm) var(--decibel-radius-sm) 0;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
+    background: var(--sg-surface-raised);
+    border: none;
+    border-left: 4px solid var(--sg-content-accent);
+    border-radius: 0 var(--sg-radius) var(--sg-radius) 0;
+    padding: 24px 32px;
+    color: var(--sg-content-secondary);
+    font-size: var(--sg-body-3-size);
   }
 
   table {
-    font-size: 0.95rem;
+    font-size: var(--sg-body-3-size);
   }
 
   tr {
-    border-color: var(--decibel-border-quaternary);
+    border-color: var(--sg-border-subtle);
   }
 
   th {
-    font-weight: 500;
-    color: var(--decibel-content-secondary);
+    font-weight: 700;
+    color: var(--sg-content-primary);
+  }
+
+  td {
+    color: var(--sg-content-secondary);
   }
 
   kbd {
-    border-color: var(--decibel-border-tertiary);
-    background: var(--decibel-surface-secondary);
-    border-radius: var(--decibel-radius-2xs);
-    font-size: 0.75rem;
+    border: 1px solid var(--sg-border-subtle);
+    background: var(--sg-surface-raised);
+    border-radius: var(--sg-radius);
+    font-size: var(--sg-note-size);
   }
 
   :not(pre) > code {
-    background: var(--decibel-surface-secondary);
-    color: var(--decibel-content-accent);
-    border-radius: var(--decibel-radius-2xs);
-    padding: 0.12em 0.4em;
-    font-size: 0.9em;
+    background: var(--sg-surface-raised);
+    color: var(--sg-content-accent);
+    border-radius: var(--sg-radius);
+    padding: 0.1em 0.35em;
+    font-size: 0.92em;
+    font-weight: 400;
   }
-}
 
-.slidev-layout::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--decibel-gradient);
-  z-index: 2;
-  pointer-events: none;
+  img {
+    border-radius: var(--sg-radius);
+  }
 }
 
 .slidev-code {
-  border: 1px solid var(--decibel-border-quaternary) !important;
+  font-weight: 400;
+  border: 1px solid var(--sg-border-subtle);
 }
 
-.slidev-layout.cover,
-.slidev-layout.intro,
-.slidev-layout.end {
-  display: grid;
-  height: 100%;
+/*
+ * Code at the full 24px overflows a column. Columns are 680–800px wide, which
+ * at 20px mono holds ~56 characters — enough for every snippet in the deck.
+ */
+.sg-split-body,
+.sg-statement-aside,
+.sg-image-right-text,
+.sg-two-cols-header .col-left,
+.sg-two-cols-header .col-right {
+  --slidev-code-font-size: 20px;
+  --slidev-code-line-height: 30px;
+  --slidev-code-padding: 20px 24px;
+}
+
+/* Monument Extended is a display face — only ever used huge and uppercase */
+.sg-display {
+  font-family: var(--sg-font-title);
+  font-weight: 900;
+  font-size: var(--sg-title-size);
+  line-height: 1.2;
+  letter-spacing: var(--sg-title-tracking);
+  text-transform: uppercase;
+  color: var(--sg-content-primary);
+}
+
+/* Lowercase is unreadable in Monument Black; code spans opt out */
+.sg-display code {
+  font-family: var(--slidev-code-font-family, monospace);
+  text-transform: none;
+  letter-spacing: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+/* ------------------------------------------------------------------ *
+ * Per-layout typography.
+ *
+ * These have to be global rather than scoped: every heading and
+ * paragraph they target arrives through a <slot> as rendered markdown.
+ * ------------------------------------------------------------------ */
+
+/* Cover and closing bookends — Monument headline, Space Grotesk standfirst */
+.slidev-layout.sg-cover,
+.slidev-layout.sg-end {
+  padding-bottom: var(--sg-margin-top);
 
   h1 {
-    font-size: 3.25rem;
+    font-family: var(--sg-font-title);
+    font-size: var(--sg-title-size);
     font-weight: 900;
-    letter-spacing: 0.02em;
-    line-height: 1.05;
-    margin-bottom: 1rem;
-  }
-
-  h1 + p,
-  h1 + div {
-    color: var(--decibel-content-secondary);
+    line-height: 1.2;
+    letter-spacing: var(--sg-title-tracking);
+    text-transform: uppercase;
+    margin-bottom: 32px;
   }
 
   h2,
   h3 {
-    font-weight: 400;
-    color: var(--decibel-content-secondary);
-  }
-}
-
-.slidev-layout.cover {
-  background-size: cover;
-  background-position: center;
-}
-
-.slidev-layout.section {
-  display: grid;
-  height: 100%;
-  align-content: center;
-
-  h1 {
-    font-size: 3rem;
-    font-weight: 900;
-    letter-spacing: 0.02em;
-    line-height: 1.1;
-    margin-bottom: 0.5rem;
+    font-size: var(--sg-body-1-size);
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    color: var(--sg-content-primary);
+    margin-bottom: 0;
   }
 
   p {
-    color: var(--decibel-content-secondary);
-    font-size: 1.25rem;
+    font-size: var(--sg-body-2-size);
+    line-height: 1.36;
   }
 }
 
-.slidev-layout.statement {
-  display: grid;
-  height: 100%;
-  text-align: center;
-  align-content: center;
-
+/* Section divider */
+.slidev-layout.sg-section {
   h1 {
-    font-size: 2.75rem;
+    font-family: var(--sg-font-title);
+    font-size: var(--sg-title-size);
     font-weight: 900;
-    letter-spacing: 0.02em;
-    line-height: 1.15;
-    max-width: 18ch;
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
-.slidev-layout.fact {
-  display: grid;
-  height: 100%;
-  text-align: center;
-  align-content: center;
-
-  h1 {
-    font-size: 5.5rem;
-    font-weight: 900;
-    letter-spacing: 0.02em;
-    line-height: 1;
-    background: var(--decibel-gradient);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    line-height: 1.2;
+    letter-spacing: var(--sg-title-tracking);
+    text-transform: uppercase;
+    margin-bottom: 24px;
   }
 
   h1 + p {
-    margin-top: 1rem;
-    font-size: 1.35rem;
+    margin: 0;
+    font-size: var(--sg-body-1-size);
     font-weight: 500;
-    color: var(--decibel-content-secondary);
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    color: var(--sg-content-primary);
   }
 }
 
-.slidev-layout.quote {
-  display: grid;
-  height: 100%;
-  align-content: center;
-
-  h1 {
-    font-size: 2.25rem;
-    font-weight: 900;
-    letter-spacing: 0.02em;
-    line-height: 1.3;
-    quotes: none;
+/* Highlight — big claim left, elaboration right */
+.slidev-layout.sg-statement {
+  .sg-statement-lead h1 {
+    font-size: var(--sg-h1-size);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.022em;
+    margin-bottom: 0;
   }
 
-  h1::before {
-    content: '';
-    display: block;
-    width: 2.5rem;
-    height: 3px;
-    margin-bottom: 1.25rem;
-    background: var(--decibel-gradient);
-    border-radius: 99px;
-  }
-
-  h1 + p {
-    margin-top: 1.25rem;
-    font-size: 1rem;
+  .sg-statement-aside p {
+    font-size: var(--sg-body-1-size);
     font-weight: 500;
-    color: var(--decibel-content-tertiary);
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    color: var(--sg-content-primary);
+    margin: 0 0 32px;
+  }
+
+  .sg-statement-aside p:last-child {
+    margin-bottom: 0;
   }
 }
 
-.slidev-layout.center {
-  h1 {
-    font-size: 2.5rem;
+/* Label left, stacked blocks right */
+.slidev-layout.sg-split {
+  .sg-split-label h1 {
+    margin-bottom: 0;
+  }
+
+  .sg-split-body h2,
+  .sg-split-body h3 {
+    margin-bottom: 16px;
+  }
+
+  .sg-split-body h2:not(:first-child),
+  .sg-split-body h3:not(:first-child) {
+    margin-top: 74px;
+  }
+
+  .sg-split-body p {
+    margin: 0;
+  }
+
+  .sg-split-body li {
+    margin: 24px 0;
   }
 }
 
-.slidev-layout.two-cols-header {
-  column-gap: 1.25rem;
-
-  .col-left,
-  .col-right {
-    min-width: 0;
-    min-height: 0;
-    background: var(--decibel-surface-secondary);
-    border: 1px solid var(--decibel-border-quaternary);
-    border-radius: var(--decibel-radius-md);
-    padding: 1.15rem 1.35rem;
+/* Title over two columns */
+.slidev-layout.sg-two-cols-header {
+  .col-header h1 {
+    margin-bottom: 48px;
   }
 
-  .col-right:has(img) {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-
-  .col-right:has(img) > * {
-    flex: 1 1 0;
-    min-height: 0;
-    max-height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .col-right img {
-    max-height: 100%;
-    max-width: 100%;
-    object-fit: contain;
+  .col-left h3,
+  .col-right h3 {
+    margin-bottom: 24px;
   }
 
   .col-left > *:first-child,
   .col-right > *:first-child {
     margin-top: 0;
   }
+}
 
-  h3 {
-    font-size: 1.125rem;
-    margin-bottom: 0.65rem;
+/* Text left, square media right.
+   128px bottom margin so the 824px square lands exactly as in the template. */
+.slidev-layout.sg-image-right {
+  padding-bottom: var(--sg-margin-top);
+
+  .sg-image-right-text h1 {
+    margin-bottom: 24px;
   }
 
-  p,
-  li {
-    font-size: 0.98rem;
+  .sg-image-right-text p {
+    font-size: var(--sg-body-2-size);
+    line-height: 1.36;
+    letter-spacing: -0.01em;
   }
 }
 
-.slidev-layout.two-columns {
-  column-gap: 1.5rem;
+/* Full-bleed media with a caption */
+.slidev-layout.sg-media {
+  padding: 0;
+
+  .sg-media-caption h1,
+  .sg-media-caption h2,
+  .sg-media-caption h3,
+  .sg-media-caption p {
+    font-size: var(--sg-h3-size);
+    font-weight: 700;
+    line-height: 1.32;
+    letter-spacing: -0.02em;
+    color: var(--sg-content-primary);
+    margin: 0;
+  }
+}
+
+/* One big number */
+.slidev-layout.sg-fact {
+  h1 {
+    font-family: var(--sg-font-title);
+    font-size: var(--sg-title-size);
+    font-weight: 900;
+    line-height: 1.2;
+    letter-spacing: var(--sg-title-tracking);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  h1 + p {
+    margin: 0 0 24px;
+    font-size: var(--sg-body-1-size);
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    color: var(--sg-content-primary);
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+    font-size: var(--sg-body-3-size);
+    color: var(--sg-content-secondary);
+  }
+}
+
+/* Pull quote */
+.slidev-layout.sg-quote {
+  img {
+    width: 132px;
+    height: 132px;
+    object-fit: cover;
+    border-radius: var(--sg-radius-full);
+    margin-bottom: 16px;
+  }
+
+  p {
+    font-size: var(--sg-h3-size);
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    color: var(--sg-content-primary);
+    margin: 0 0 16px;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+    font-size: var(--sg-body-3-size);
+    color: var(--sg-content-secondary);
+  }
+}
+
+/* Card row — 151px bottom margin puts the 678px cards where the template has them */
+.slidev-layout.sg-cards {
+  padding-bottom: 151px;
+
+  h1 {
+    margin-bottom: 65px;
+  }
+}
+
+/* Images dropped into a column should fit, not crop */
+.slidev-layout.sg-two-cols-header {
+  .col-left img,
+  .col-right img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+}
+
+/* Opt-in centring, as on template slide 4 */
+.slidev-layout.text-center .sg-section-body,
+.slidev-layout.text-center .sg-fact-body {
+  max-width: none;
+  align-items: center;
+  text-align: center;
 }

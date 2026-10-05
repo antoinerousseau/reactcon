@@ -1,8 +1,7 @@
 ---
 theme: ./theme
+canvasWidth: 1920
 layout: cover
-background: /images/marsatac.jpg
-class: text-center
 highlighter: shiki
 lineNumbers: false
 transition: slide-left
@@ -14,9 +13,7 @@ mdc: true
 
 ## Offline-first ground operations in React Native
 
-<div class="pt-12">
-  Antoine Rousseau — Engineering Manager @ Shotgun
-</div>
+Antoine Rousseau — Engineering Manager @ Shotgun
 
 <!--
 Speaker Notes:
@@ -57,30 +54,25 @@ Speaker Notes:
 -->
 
 ---
+layout: image-right
+fit: contain
+---
 
 # You're in
 
-<div class="grid grid-cols-[1fr_16rem] gap-8 items-center h-[calc(100%-3.25rem)]">
-
-<div>
-
 Press-and-hold → QR → result overlay
 
-<div class="flex gap-2 pt-6">
+<div class="flex gap-4 pt-10">
   <Badge variant="positive">Valid</Badge>
   <Badge variant="warning">Already in</Badge>
   <Badge variant="negative">Invalid</Badge>
 </div>
 
-</div>
+::right::
 
-<div class="rounded-[var(--decibel-radius-lg)] border border-dashed border-[var(--decibel-border-secondary)] overflow-hidden">
-  <SlidevVideo autoplay muted loop autoreset="slide">
-    <source src="./videos/scan.mp4" type="video/mp4" />
-  </SlidevVideo>
-</div>
-
-</div>
+<SlidevVideo autoplay muted loop autoreset="slide">
+  <source src="./videos/scan.mp4" type="video/mp4" />
+</SlidevVideo>
 
 <!--
 Speaker Notes:
@@ -91,10 +83,12 @@ Speaker Notes:
 -->
 
 ---
+layout: statement
+---
 
-# The rule
+# A scan never waits on the network.
 
-**A scan never waits on the network.**
+::right::
 
 SQLite is the source of truth at the door.
 
@@ -161,16 +155,20 @@ Speaker Notes:
 -->
 
 ---
+layout: split
+---
 
 # The camera is three costs
+
+::right::
 
 Press-and-hold is the first cut. Battery is the rest.
 
 <v-clicks>
 
-1. **Native session** — just opening the camera
-2. **Frame processor** — QR + barcode on every frame
-3. **The library** — [expo-camera](https://docs.expo.dev/versions/latest/sdk/camera/) is fine so far; we'll measure others if it isn't
+- **Native session** — just opening the camera
+- **Frame processor** — QR + barcode on every frame
+- **The library** — [expo-camera](https://docs.expo.dev/versions/latest/sdk/camera/) is fine so far; we'll measure others if it isn't
 
 </v-clicks>
 
@@ -236,6 +234,20 @@ Speaker Notes:
 -->
 
 ---
+layout: section
+---
+
+# Catching up
+
+The door is done. Everything after this is bookkeeping.
+
+<!--
+Speaker Notes:
+- Transition slide. Breathe here.
+- Everything so far happened on one phone with no network. Now we reconcile.
+-->
+
+---
 layout: two-cols-header
 ---
 
@@ -246,7 +258,6 @@ Events, tickets, deals, scan logs, orders, transfers…
 ::left::
 
 ### Pull — 18 entity streams
-
 
 - Keyset cursor: `(updatedAt, id)`
 - Pages of 2,000
@@ -340,26 +351,36 @@ Speaker Notes:
 -->
 
 ---
+layout: section
+glow: top-left
+---
+
+# The rest of the kit
+
+Selling, printing, permissions, and keeping it all observable.
+
+<!--
+Speaker Notes:
+- Transition. The scan path is done — this is everything else the door staff touch.
+- If you are running long, this is where you start cutting.
+-->
+
+---
+layout: image-right
+fit: contain
+---
 
 # Tap to Pay
-
-<div class="grid grid-cols-[1fr_16rem] gap-8 items-center h-[calc(100%-3.25rem)]">
-
-<div>
 
 Phone → tap → paid → share ticket
 
 `stripe-terminal-react-native`
 
-</div>
+::right::
 
-<div class="rounded-[var(--decibel-radius-lg)] border border-dashed border-[var(--decibel-border-secondary)] overflow-hidden">
-  <SlidevVideo autoplay muted loop autoreset="slide">
-    <source src="./videos/taptopay.mp4" type="video/mp4" />
-  </SlidevVideo>
-</div>
-
-</div>
+<SlidevVideo autoplay muted loop autoreset="slide">
+  <source src="./videos/taptopay.mp4" type="video/mp4" />
+</SlidevVideo>
 
 <!--
 Speaker Notes:
@@ -370,32 +391,27 @@ Speaker Notes:
 -->
 
 ---
-layout: two-cols-header
+layout: image-right
+fit: contain
 ---
 
 # Thermal tickets
 
 Star Micronics — Bluetooth or USB
 
-::left::
-
 ### What we print
 
-- The ticket they just bought (QR code & info)
-- Prints by itself after the sale
-- If using our drawer, cash sales open it
-
-<br>
+The ticket they just bought, QR and all. It prints by itself after the sale, and
+a cash sale opens the drawer.
 
 ### How
 
-- **Skia** draws the ticket → bitmap → printer
-- Local queue: retries, uncertain outcomes
-- Sale is done. Print is catch-up.
+**Skia** draws the ticket → bitmap → printer. A local queue handles retries and
+uncertain outcomes. The sale is done; the print is catch-up.
 
 ::right::
 
-<img src="./images/printed-ticket.jpg" alt="Printed thermal ticket" class="max-h-full object-contain mx-auto rounded" />
+<img src="./images/printed-ticket.jpg" alt="Printed thermal ticket" />
 
 <!--
 Speaker Notes:
@@ -439,12 +455,11 @@ Speaker Notes:
 -->
 
 ---
-layout: two-cols-header
+layout: image-right
+fit: contain
 ---
 
 # Channel surfing
-
-::left::
 
 QA on a physical phone, no native rebuild.
 
@@ -459,14 +474,12 @@ if ((await checkForUpdateAsync()).isAvailable) {
 await reloadAsync();
 ```
 
-Every PR publishes an EAS Update.
-
-Preview builds allow picking the channel in a debug screen.
+Every PR publishes an EAS Update. Preview builds let you pick the channel in a
+debug screen.
 
 ::right::
 
-<img src="./images/dev-settings.png" alt="Dev settings" class="max-h-full object-contain mx-auto" />
-
+<img src="./images/dev-settings.png" alt="Dev settings" />
 
 <!--
 Speaker Notes:
@@ -564,38 +577,46 @@ Speaker Notes:
 -->
 
 ---
-layout: center
-class: text-center
+layout: cards
 ---
 
 # Takeaways
 
-<div class="text-left inline-block">
+::cards::
 
-1. **Treat the network as optional.** Scan against SQLite. Sync is an outbox.
-2. **Name the race.** Mesh shrinks double-scans. It does not give you a lock.
-3. **Share types, not URLs.** Monorepo + oRPC + Zod.
+<Card label="Treat the network as optional">
 
-</div>
+Scan against SQLite. Sync is an outbox.
+
+</Card>
+
+<Card label="Name the race">
+
+Mesh shrinks double-scans. It does not give you a lock.
+
+</Card>
+
+<Card label="Share types, not URLs">
+
+Monorepo + oRPC + Zod.
+
+</Card>
 
 <!--
 Speaker Notes:
-- Leave this up. Walk the five lines slowly.
+- Leave this up. Walk the three cards slowly.
 - Invite questions on: the remaining double-scan window, mesh vs Bridgefy, camera battery, printing, Expo modules, permissions, testing, Sentry.
 -->
 
 ---
 layout: end
-class: text-center
 ---
 
 # Thank you
 
-### Questions
+## Questions
 
-<div class="pt-12">
-  Antoine Rousseau — Engineering Manager @ Shotgun
-</div>
+Antoine Rousseau — Engineering Manager @ Shotgun
 
 <!--
 Speaker Notes:

@@ -1,11 +1,11 @@
+/**
+ * Space Grotesk is fetched by Slidev's font loader (see theme/package.json).
+ * Monument Extended is licensed, so it ships with the theme.
+ */
 @font-face {
   font-family: "Monument Extended";
   src: url("./fonts/MonumentExtended-Black.woff2") format("woff2");
   font-weight: 900;
   font-style: normal;
-  font-display: swap;
-}
-
-:root {
-  --decibel-font-title: "Monument Extended", sans-serif;
+  font-display: block;
 }

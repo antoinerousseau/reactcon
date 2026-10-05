@@ -1,31 +1,34 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { handleBackground, resolveAssetUrl } from '@slidev/client'
+import ShotgunLogo from '../components/ShotgunLogo.vue'
+import SlideShell from '../components/SlideShell.vue'
 
-const props = defineProps<{
-  background?: string
-}>()
-
-const style = computed(() => {
-  if (!props.background)
-    return {}
-
-  const isColor = props.background[0] === '#' || props.background.startsWith('rgb')
-  if (isColor)
-    return handleBackground(props.background, true)
-
-  const url = resolveAssetUrl(props.background)
-  return {
-    ...handleBackground(props.background, true),
-    backgroundImage: `linear-gradient(oklch(0.222 0 0 / 0.42), oklch(0.222 0 0 / 0.82)), url("${url}")`,
-  }
-})
+/**
+ * Title slide. The template's own cover is a pure brand slide (centred logo on
+ * the full-width glow); a talk needs a title, so this keeps the glow and the
+ * lockup and borrows the section-title type treatment for the headline.
+ */
 </script>
 
 <template>
-  <div class="slidev-layout cover" :style="style">
-    <div class="my-auto w-full">
+  <SlideShell name="sg-cover" glow="cover" :footer="false">
+    <ShotgunLogo class="sg-cover-logo" :width="240" />
+    <div class="sg-cover-body">
       <slot />
     </div>
-  </div>
+  </SlideShell>
 </template>
+
+<style scoped>
+.sg-cover-logo {
+  flex: none;
+}
+
+.sg-cover-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-bottom: 64px;
+}
+</style>

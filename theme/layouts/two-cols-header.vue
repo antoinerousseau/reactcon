@@ -1,57 +1,59 @@
 <script setup lang="ts">
-const props = defineProps({
-  class: {
-    type: String,
-  },
-  layoutClass: {
-    type: String,
-  },
-})
+import SlideShell from '../components/SlideShell.vue'
+import type { GlowPlacement } from '../types'
+
+/**
+ * Template slides 8/16: slide title across the top, two equal 800px columns
+ * underneath. The template gives the columns no card chrome — they are plain
+ * text blocks separated by the 64px gutter.
+ */
+const props = withDefaults(defineProps<{
+  glow?: GlowPlacement
+  class?: string
+  layoutClass?: string
+}>(), { glow: 'top-right' })
 </script>
 
 <template>
-  <div class="slidev-layout two-cols-header w-full h-full" :class="layoutClass">
+  <SlideShell name="sg-two-cols-header" :glow="glow" :layout-class="layoutClass">
     <div class="col-header">
       <slot />
     </div>
-    <div class="col-left" :class="props.class">
-      <slot name="left" />
+    <div class="sg-cols">
+      <div class="col-left" :class="props.class">
+        <slot name="left" />
+      </div>
+      <div class="col-right" :class="props.class">
+        <slot name="right" />
+      </div>
     </div>
-    <div v-click class="col-right" :class="props.class">
-      <slot name="right" />
-    </div>
-    <div class="col-bottom" :class="props.class">
+    <div class="col-bottom">
       <slot name="bottom" />
     </div>
-  </div>
+  </SlideShell>
 </template>
 
 <style scoped>
-.two-cols-header {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: auto minmax(0, 1fr) auto;
+.col-header {
+  flex: none;
 }
 
-.col-header {
-  grid-area: 1 / 1 / 2 / 3;
+.sg-cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--sg-gutter);
+  align-content: start;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .col-left,
 .col-right {
+  min-width: 0;
   min-height: 0;
 }
 
-.col-left {
-  grid-area: 2 / 1 / 3 / 2;
-}
-
-.col-right {
-  grid-area: 2 / 2 / 3 / 3;
-}
-
 .col-bottom {
-  align-self: end;
-  grid-area: 3 / 1 / 3 / 3;
+  flex: none;
 }
 </style>

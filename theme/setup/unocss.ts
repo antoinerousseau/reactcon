@@ -1,29 +1,32 @@
 export default () => ({
   shortcuts: {
-    'bg-main': 'bg-[var(--decibel-surface-primary)] text-[var(--decibel-content-primary)]',
-    'border-main': 'border-[var(--decibel-border-quaternary)]',
+    'bg-main': 'bg-[var(--sg-surface)] text-[var(--sg-content-primary)]',
+    'border-main': 'border-[var(--sg-border-subtle)]',
   },
   theme: {
     fontFamily: {
       title: '"Monument Extended", sans-serif',
+      sans: '"Space Grotesk", sans-serif',
     },
     colors: {
-      accent: 'var(--decibel-content-accent)',
+      accent: 'var(--sg-content-accent)',
+      teal: 'var(--sg-teal)',
+      pink: 'var(--sg-pink)',
+      peach: 'var(--sg-peach)',
+      periwinkle: 'var(--sg-periwinkle)',
       surface: {
-        primary: 'var(--decibel-surface-primary)',
-        secondary: 'var(--decibel-surface-secondary)',
-        tertiary: 'var(--decibel-surface-tertiary)',
+        DEFAULT: 'var(--sg-surface)',
+        raised: 'var(--sg-surface-raised)',
       },
       content: {
-        primary: 'var(--decibel-content-primary)',
-        secondary: 'var(--decibel-content-secondary)',
-        tertiary: 'var(--decibel-content-tertiary)',
-        accent: 'var(--decibel-content-accent)',
-        negative: 'var(--decibel-content-negative)',
-        warning: 'var(--decibel-content-warning)',
-        positive: 'var(--decibel-content-positive)',
-        informative: 'var(--decibel-content-informative)',
+        primary: 'var(--sg-content-primary)',
+        secondary: 'var(--sg-content-secondary)',
+        accent: 'var(--sg-content-accent)',
+        inverse: 'var(--sg-content-inverse)',
       },
+    },
+    borderRadius: {
+      card: 'var(--sg-radius)',
     },
   },
 })
