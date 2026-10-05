@@ -45,6 +45,10 @@
   --sg-body-3-size: 24px;
   --sg-note-size: 20px;
 
+  /* List items carry looser leading than running text. Both bullet markers are
+     centred against this, so it has to stay a bare ratio. */
+  --sg-list-leading: 1.8;
+
   /* Layout grid — 128px margins, 64px gutters, 1664px of content */
   --sg-margin-x: 128px;
   --sg-margin-top: 128px;

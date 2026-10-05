@@ -103,13 +103,17 @@
     position: relative;
     padding-left: 44px;
     margin: 20px 0;
+    line-height: var(--sg-list-leading);
   }
 
+  /* Both markers centre on the item's first line box rather than its top, so
+     they stay put when an item wraps. The dash inherits the item's leading,
+     which makes 0.5lh exactly that line's midpoint. */
   ul > li::before {
     content: "";
     position: absolute;
     left: 4px;
-    top: 13px;
+    top: calc(0.5lh - 1px);
     width: 14px;
     height: 2px;
     background: var(--sg-content-accent);
@@ -119,6 +123,8 @@
     counter-increment: sg-step;
   }
 
+  /* The number is set smaller than the text, so 0.5lh would measure its own
+     box. Giving it the item's line box instead centres it like the dash. */
   ol > li::before {
     content: counter(sg-step);
     position: absolute;
@@ -126,7 +132,7 @@
     top: 0;
     font-size: var(--sg-note-size);
     font-weight: 700;
-    line-height: 1.6;
+    line-height: calc(var(--sg-body-3-size) * var(--sg-list-leading));
     color: var(--sg-content-accent);
     font-variant-numeric: tabular-nums;
   }
