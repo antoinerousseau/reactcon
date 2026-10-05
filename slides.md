@@ -55,7 +55,6 @@ Speaker Notes:
 
 ---
 layout: image-right
-fit: contain
 ---
 
 # You're in
