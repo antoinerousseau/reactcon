@@ -76,7 +76,20 @@
   }
 
   p {
-    margin: 16px 0;
+    margin: 20px 0;
+  }
+
+  /* List items use a taller line height than paragraphs (1.8 vs 1.34), so they
+     carry ~5px more built-in space around their text. Margins collapse, so
+     bump the shared edge to keep the visible gap as large as between bullets. */
+  ul + p,
+  ol + p {
+    margin-top: calc(20px + (var(--sg-list-leading)) * var(--sg-body-3-size) / 2);
+  }
+
+  p:has(+ ul),
+  p:has(+ ol) {
+    margin-bottom: calc(20px + (var(--sg-list-leading)) * var(--sg-body-3-size) / 2);
   }
 
   /* A lone sentence straight under the slide title acts as a standfirst */

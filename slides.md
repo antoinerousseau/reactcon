@@ -330,12 +330,17 @@ layout: two-cols-header
 
 # Nearby scanners: the race we still have
 
-- Two gates, both offline, same valid ticket, same second
-- Mesh has not arrived yet
-- Both scans validate (`scan` sync action & `checked_in` result)
-- Server later keeps both logs (different UUIDs)
+It takes **all** of these at the same time:
 
-*We don't invent a distributed lock*
+- The **same valid ticket** at **two different gates**
+- Scanned within **the same second**
+- Before the Bluetooth message from the first gate reaches the second
+
+Then both scans say `checked_in`, and the server keeps both logs (different UUIDs).
+
+<br />
+
+***Almost impossible in practice**: no need to invent a distributed lock for it.*
 
 ::bottom::
 
@@ -343,9 +348,9 @@ Note: for now we use [Bridgefy](https://github.com/bridgefy/bridgefy-react-nativ
 
 <!--
 Speaker Notes:
-- Be honest. This is the question you will get.
-- The mesh shrinks the window, it doesn't close it: Bluetooth range, permissions, no distributed lock.
-- Say this sentence: we accept a small double-scan window over blocking the door.
+- Be honest, but keep it in proportion: this is the question you will get, and it needs several things at once.
+- Same ticket, two gates, same second, before the mesh message lands. The mesh shrinks that window but doesn't fully close it (range, permissions, no distributed lock).
+- Say this sentence: we accept a tiny double-scan window over blocking the door.
 - Why own the mesh: Bridgefy crashes in the field. @shotgun/mesh is GATT writes + TTL gossip for small meshes, inspired by BitChat.
 - Android needs Bluetooth + location permissions. The simulator is a no-op.
 -->
@@ -403,6 +408,8 @@ Star Micronics — Bluetooth or USB
 
 The ticket they just bought, QR and all. It prints by itself after the sale, and
 a cash sale opens the drawer.
+
+<br />
 
 ### How
 
