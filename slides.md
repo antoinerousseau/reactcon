@@ -513,21 +513,13 @@ layout: image-right
 fit: contain
 ---
 
-# Printing over Bluetooth
+# Printing
 
-Star Micronics — Bluetooth or USB
-
-### What we print
-
-The ticket they just bought, QR and all. It prints by itself after the sale, and
-a cash sale opens the drawer.
-
-<br />
-
-### How
-
-**[Skia](https://shopify.github.io/react-native-skia/)** draws the ticket → bitmap → printer. A local queue handles retries and
-uncertain outcomes. The sale is done; the print is catch-up.
+- Ticket = QR code + infos
+- Drawn using [Skia](https://shopify.github.io/react-native-skia/), for our Star Micronics printers
+- Prints by itself after the sale
+- Over Bluetooth or USB
+- A local queue handles retries and uncertain outcomes
 
 ::right::
 
@@ -538,7 +530,7 @@ Speaker Notes:
 - Why Skia: the ticket layout is ours, not ESC/POS templates. And it's easier to test: the layout is drawn by code we can render and check without a printer.
 - The queue lives on the device: same offline-first instinct as scans.
 - Pairing and test print are in settings. After a sale a print is enqueued; cash sales can open the drawer.
-- The Star printer is the only extra hardware at the till.
+- We can rent the printer alone, or integrated into our drawer (in that case it automatically opens the drawer after a cash sale)
 -->
 
 ---
@@ -546,14 +538,58 @@ layout: section
 glow: top-left
 ---
 
-# Chapter 4
+# Reliability
 
-Test & QA
+Tests, QA & observability
 
 <!--
 Speaker Notes:
 - Everything that lets us ship before D-Day without fear.
 - Short on time? Keep OTA + Sentry, skip the rest.
+-->
+
+---
+layout: two-cols-header
+---
+
+# Tests: API & app
+
+Vitest for the API. Maestro for the app.
+
+::left::
+
+### API — Vitest
+
+Call the oRPC procedure. Real DB. Isolated per test.
+
+```typescript
+await call(syncActions.push, { syncActions }, { context })
+```
+
+TID dedupe, permissions, refunds — same routers the phone hits.
+
+::right::
+
+### App — Maestro
+
+YAML on a real iOS build. Seeded event, then teardown.
+
+```yaml
+- tapOn: { id: module_sell }
+- tapOn: { id: cash }
+- assertVisible: { id: sale_registered }
+```
+
+Login, ticketing, sell. Not the camera. Yet.
+
+<!--
+Speaker Notes:
+- API: Vitest + call() from @orpc/server. Same procedures the app hits. Real Postgres, each test in a savepoint that's rolled back.
+- syncActions.push is the key test: TID is idempotent, a bad item doesn't fail the batch, a succeeded scan sets redeemedAt.
+- evaluateScan: Vitest on the client (~850 lines of tests), no DB. Don't mix it into the API column unless asked.
+- Maestro: login, seeded event, create a ticket, cash sale, logout. testIDs, not screenshots.
+- CI: EAS workflow on main: seed an event, iOS e2e build, Maestro (2 retries), teardown.
+- Camera scan isn't in Maestro (lighting, hardware). Channel surfing is how we QA that.
 -->
 
 ---
@@ -643,9 +679,9 @@ Sentry.init({
 
 ::right::
 
-### Keep the door up
+### Keep it up
 
-- Error boundary: toast, then retry
+- Error boundary: clear message, with retry button
 - Tag `git_hash` — which OTA
 - Tag `context` + `action` — Scan, Mesh, Stripe
 
@@ -657,50 +693,6 @@ Speaker Notes:
 - git_hash = EXPO_PUBLIC_GIT_HASH: you know which build is on the phone.
 - reportError(context, action) is how Stripe, mesh and scan errors get their tags.
 - Sentry.wrap(RootLayout) + wrapExpoRouterErrorBoundary: retry, not a white screen.
--->
-
----
-layout: two-cols-header
----
-
-# Tests: API & app
-
-Vitest for the API. Maestro for the app.
-
-::left::
-
-### API — Vitest
-
-Call the oRPC procedure. Real DB. Isolated per test.
-
-```typescript
-await call(syncActions.push, { syncActions }, { context })
-```
-
-TID dedupe, permissions, refunds — same routers the phone hits.
-
-::right::
-
-### App — Maestro
-
-YAML on a real iOS build. Seeded event, then teardown.
-
-```yaml
-- tapOn: { id: module_sell }
-- tapOn: { id: cash }
-- assertVisible: { id: sale_registered }
-```
-
-Login, ticketing, sell. Not the camera. Yet.
-
-<!--
-Speaker Notes:
-- API: Vitest + call() from @orpc/server. Same procedures the app hits. Real Postgres, each test in a savepoint that's rolled back.
-- syncActions.push is the key test: TID is idempotent, a bad item doesn't fail the batch, a succeeded scan sets redeemedAt.
-- evaluateScan: Vitest on the client (~850 lines of tests), no DB. Don't mix it into the API column unless asked.
-- Maestro: login, seeded event, create a ticket, cash sale, logout. testIDs, not screenshots.
-- CI: EAS workflow on main: seed an event, iOS e2e build, Maestro (2 retries), teardown.
-- Camera scan isn't in Maestro (lighting, hardware). Channel surfing is how we QA that.
 -->
 
 ---
