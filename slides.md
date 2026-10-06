@@ -31,21 +31,21 @@ layout: two-cols-header
 
 ::left::
 
-### D-Day
+### Event D-Day
 
-- Basements, fields, packed clubs
+- Basements, festival fields, packed clubs
 - Cellular dies when 10k people arrive
-- Staff are stressed and not looking at docs
-- A freeze at the gate is a street problem
+- Staff are stressed and won't open a manual
+- A freeze at the gate can lead to dangerous crowding
 
 ::right::
 
 ### What the app must do
 
 - Start and log in fast
-- Scan in well under a second, offline
-- Sell tickets, beers… without a terminal
-- Stay testable and never crash
+- Scan instantly, offline
+- Sell tickets or beers without an extra terminal
+- Never lag, never crash
 
 <!--
 Speaker Notes:
@@ -59,13 +59,30 @@ layout: section
 glow: top-left
 ---
 
-# Chapter 1
+# Start fast
 
-Fast app start & fast login
+App launch & login
+
+---
+
+# Fast app launch
+
+<v-clicks>
+
+- **[Expo](https://expo.dev/)** — one toolchain, native modules when we need them
+- **[Expo Router](https://docs.expo.dev/router/)** — file-based & protected routes
+- **[Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/)** via [Drizzle ORM](https://orm.drizzle.team/) — local DB, schema kept up to date by Drizzle migrations
+- **[TanStack React Query](https://tanstack.com/query/latest/docs/framework/react/overview)** — hooks for data fetching, caching, and state management
+- **[react-native-mmkv](https://github.com/mrousavy/react-native-mmkv)** — synchronous key-value storage for settings
+- **[Uniwind](https://docs.uniwind.dev/)** pro — Tailwind classes, C++ engine for fast rendering
+- **[react-native-reanimated](https://docs.expo.dev/versions/latest/sdk/reanimated/)** & **[react-native-worklets](https://reactnative.dev/docs/worklets)** — Smooth animations
+
+</v-clicks>
 
 <!--
 Speaker Notes:
-- Before the first scan, staff have to get in the app. Quickly.
+- Many others useful Expo libraries used, hence the choice for Expo
+- TanStack Query reads from SQLite
 -->
 
 ---
@@ -84,38 +101,14 @@ Create account → Open app → Scan QR → In
 
 <!--
 Speaker Notes:
-- Play the recording.
-- Can also log in with username and password.
-- Next: what makes the app start fast.
--->
-
----
-
-# Starting fast
-
-Render from the phone, not from the network.
-
-<v-clicks>
-
-- **[Expo](https://expo.dev/)** — one toolchain, native modules when we need them
-- **[expo-router](https://docs.expo.dev/router/)** — file-based routes
-- **[Uniwind](https://docs.uniwind.dev/)** pro — Tailwind classes, native styling
-- **[expo-sqlite](https://docs.expo.dev/versions/latest/sdk/sqlite/)** — local DB, schema kept up to date by migrations
-
-</v-clicks>
-
-<!--
-Speaker Notes:
-- The point is not the library list. The point: on launch the UI reads SQLite, it does not wait for an API call.
-- expo-sqlite + Drizzle: the schema is versioned, migrations run on the phone.
-- TanStack Query reads from SQLite. It is not caching a REST call.
+- Can also log in with username and password
 -->
 
 ---
 
 # Types across the wire
 
-Everything not local is a typed oRPC client — not REST, not GraphQL. Inputs and outputs validated with [Zod](https://zod.dev/).
+Shared TypeScript types between server and app with oRPC.
 
 ```typescript
 import type { APIClient } from "backstage-server/client";
@@ -130,40 +123,33 @@ export function createAPIClient(headers?: Headers): APIClient {
 }
 ```
 
-Same router type on phone and server. Old binaries get `406` → `/outdated-version`.
+Inputs and outputs are validated with [Zod](https://zod.dev/).
+
+Old app versions get an HTTP 406 → `/outdated-version`.
 
 <!--
 Speaker Notes:
-- oRPC: end-to-end TypeScript without maintaining an OpenAPI client.
-- GraphQL is only on the server, to list EAS channels from Expo's API.
-- x-app-version: we force upgrades rather than debug three app versions in a basement.
+- oRPC: end-to-end TypeScript.
+- x-app-version: we set a minimum version in an oRPC middleware.
+- other middlewares: auth, permissions, logging, etc.
 -->
 
 ---
 
-# Shape of the system
+# Architecture
 
-Expo app, oRPC server, shared SQLite schema — one TypeScript repo.
+Integrated in our TypeScript monorepo
 
 ```
 shotgun/
-├── apps/backstage/          # Expo / React Native
-├── apps/backstage-server/   # oRPC API (Next.js)
-└── packages/backstage/      # Zod, Drizzle, scan types
+├── apps/backstage/          # Expo / React Native app
+├── apps/backstage-server/   # oRPC API
+└── packages/backstage/      # Zod, Drizzle, and other shared code
 ```
-
-<v-clicks>
-
-- Phone: Expo app, local SQLite
-- Server: oRPC API, exposes `APIClient`
-- Shared: Zod schemas, Drizzle schema, scan types
-
-</v-clicks>
 
 <!--
 Speaker Notes:
-- These three packages are the contract. A schema change in packages/backstage breaks the app and the server at compile time.
-- Skip the library list. The pieces show up as we walk the scan.
+- Allows for code sharing and integrated CI
 -->
 
 ---
@@ -181,23 +167,21 @@ Events, tickets, deals, scan logs, orders, transfers…
 - New phone: no cursor, so the whole event arrives as full pages
 - 16 entity streams, pulled in parallel
 - Keyset cursor: `(updatedAt, id)`
-- Pages of 2,000
+- Pages of 2,000 items every second until fully loaded
 
 ::right::
 
 ### Regular polling
 
-- Full page: again in **1s**
-- Short page: back to **~10s**
-- Only when the network is there — offline, polling just pauses
+- Every **10** seconds (or more for rarely-changing entities)
+- Only when online, otherwise polling just pauses
 - The app never waits for it
 
 <!--
 Speaker Notes:
-- Split endpoints, not one sync blob. The old monolithic sync endpoint is only for old clients.
 - Full page (2,000) means there's more: poll again in 1s. Short page means we're current: back to steady polling (10s for most streams, slower for rarely-changing ones).
-- Cursor is (updatedAt, id). Skip the details unless asked.
 - Until the first pull is complete a missing ticket is "still_loading", not "unknown". We'll see that in chapter 2.
+- All this is done in the background.
 -->
 
 ---
@@ -206,30 +190,29 @@ layout: two-cols-header
 
 # Who can do what
 
-Roles are a default. Events override.
-
 ::left::
 
-### Permissions, not just admin/editor
+### Granular permissions, not just roles
 
 - `scan` / `force_check_in`
 - `sell_taptopay` / `sell_cash` / `sell_pix`
 - `refund_all` / `refund_onsite`
 - `display_scan_module` / `display_pos_module`
 
+Assigned per event: a role gives defaults, which can be overridden
+
 ::right::
 
 ### Enforced twice
 
+- Client: hide the module or button if not allowed
 - Server: `permissionMiddleware` on oRPC
-- Client: hide the module, still fail closed on the API
-- Cached locally in `eventPermissions` for offline UI
 
 <!--
 Speaker Notes:
 - A bartender sells cash but doesn't refund last night's online sales.
 - A door person scans, but can't force check-in.
-- Per-event overrides live in eventMemberPermissionOverrides.
+- In the backend and Web admin we pick roles, that give presets of permissions for the allowed events.
 - Offline, the UI uses the last synced permissions. The server checks again on every call.
 -->
 
@@ -238,14 +221,9 @@ layout: section
 glow: top-left
 ---
 
-# Chapter 2
+# Scan tickets
 
-Scan tickets
-
-<!--
-Speaker Notes:
-- This is the heart of the talk. Spend most of the time here.
--->
+Fast and offline
 
 ---
 layout: image-right
@@ -351,6 +329,7 @@ const syncAction = {
   syncedAt: null,
 };
 
+// store locally
 await db.transaction(async (tx) => {
   await upsert(client, schema.syncActions, [syncAction], { tx });
   await upsert(client, schema.scanLogs, [scanLog], { tx });
@@ -359,8 +338,6 @@ await db.transaction(async (tx) => {
 // then broadcast over Bluetooth mesh
 void sendData({ type: "syncAction", syncAction });
 ```
-
-The door is done. Sync is an outbox.
 
 <!--
 Speaker Notes:
