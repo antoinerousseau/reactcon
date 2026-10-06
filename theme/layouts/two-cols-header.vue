@@ -23,7 +23,7 @@ const props = withDefaults(defineProps<{
       <div class="col-left" :class="props.class">
         <slot name="left" />
       </div>
-      <div class="col-right" :class="props.class">
+      <div v-click class="col-right" :class="props.class">
         <slot name="right" />
       </div>
     </div>
