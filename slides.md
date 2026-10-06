@@ -91,7 +91,11 @@ layout: image-right
 
 # Fast login
 
-Create account → Open app → Scan QR → In
+Create account → Open app → Scan QR
+
+<div class="flex gap-4 mt-6">
+  <Badge variant="positive">You're in</Badge>
+</div>
 
 ::right::
 
@@ -180,7 +184,7 @@ Events, tickets, deals, scan logs, orders, transfers…
 <!--
 Speaker Notes:
 - Full page (2,000) means there's more: poll again in 1s. Short page means we're current: back to steady polling (10s for most streams, slower for rarely-changing ones).
-- Until the first pull is complete a missing ticket is "still_loading", not "unknown". We'll see that in chapter 2.
+- Until the first pull is complete a missing ticket is "still_loading", not "unknown". We'll see that in the Scan chapter.
 - All this is done in the background.
 -->
 
@@ -231,9 +235,9 @@ layout: image-right
 
 # You're in
 
-QR → result overlay
+Ticket → result
 
-<div class="flex gap-4 pt-10">
+<div class="flex gap-4 mt-6">
   <Badge variant="positive">Valid</Badge>
   <Badge variant="negative">Already in</Badge>
   <Badge variant="negative">Invalid</Badge>
@@ -247,24 +251,20 @@ QR → result overlay
 
 <!--
 Speaker Notes:
-- Play the recording (or live demo). 60-90 seconds max.
 - Point out: full-screen result, no spinner.
 - Then: "that overlay did not wait for our API."
-- Tap to Pay has its own demo later. Don't play it here.
 -->
 
 ---
 
 # A simple, always-on scanner
 
-Point the phone, get an answer. Nothing to find, nothing to tap.
-
-The camera is the biggest battery and speed cost of the app.
+The camera is the biggest battery and speed cost of the scan module.
 
 <v-clicks>
 
-- **Native session** — just keeping the camera open
-- **Frame processor** — QR + barcode on every frame
+- **Open camera** — uses battery, but takes up to 1 second to start it so we keep it open between scans
+- **Frame processor** — Looking for a QR code or barcode on every frame, so only when actively scanning
 - **The library** — [expo-camera](https://docs.expo.dev/versions/latest/sdk/camera/) is fine so far; we'll measure others if it isn't
 
 </v-clicks>
@@ -272,47 +272,28 @@ The camera is the biggest battery and speed cost of the app.
 <!--
 Speaker Notes:
 - Reliability first: staff with gloves, in the dark, in a hurry. The fewer gestures, the fewer mistakes.
-- Costs: the native session, the frame processor, the library. Those are the battery and speed knobs.
-- expo-camera for now. We'd measure alternatives if traces say so. No winner crowned.
--->
-
----
-layout: statement
----
-
-# A scan never waits on the network.
-
-::right::
-
-SQLite is the source of truth at the door.
-
-The server is how we catch up — later.
-
-<!--
-Speaker Notes:
-- This is the whole talk in one sentence.
-- Ticket not in the local DB yet: still_loading. We never guess.
+- Alternatives: react-native-vision-camera, or paid solutions like Scanbot
 -->
 
 ---
 
 # A local database of tickets
 
-Everything a scan needs is already on the phone.
+A scan never waits on the network: SQLite is the source of truth at the door, everything a scan needs is already on the phone.
 
 <v-clicks>
 
-- One **SQLite JOIN** loads the ticket, deals, scan logs and transfers
+- One **SQLite JOIN** loads the ticket, deal, entrances, scan logs and transfers
 - Instant: no request, no spinner, no timeout
-- Kept fresh by the pull from chapter 1
-- Ticket not there yet? `still_loading` — we never guess
+- Kept fresh by the regular polling and mesh sync
+- Ticket not there + initial polling not done? `still_loading` instead of `unknown`
 
 </v-clicks>
 
 <!--
 Speaker Notes:
-- TanStack Query reads from SQLite. It is not caching a REST call made at scan time.
-- still_loading: ticket not in SQLite and the pull is incomplete. Staff wait.
+- The server is how we catch up, later.
+- still_loading: ticket not in SQLite but the pull is incomplete. Staff wait.
 - unknown: pull is complete and the code isn't in it.
 -->
 
@@ -322,7 +303,7 @@ Speaker Notes:
 
 ```typescript
 const syncAction = {
-  uuid: generateTID(),
+  tid: generateTID(), // Timestamp Identifier, like UUID but sortable and shorter
   eventId: payload.eventId,
   payload: scanLog,
   broadcastedAt: null,
@@ -344,7 +325,6 @@ Speaker Notes:
 - Outbox: the scan is committed on the device before anyone else knows.
 - syncedAt null = not on the server yet. broadcastedAt tracks the mesh. A failed broadcast doesn't roll back the scan.
 - TIDs ([ATProto](https://atproto.com/specs/tid)): sortable, unique IDs generated offline with no server round-trip.
-- Serial mutation scope { id: "scan" }: two rapid QR reads don't interleave.
 -->
 
 ---
@@ -353,24 +333,24 @@ layout: two-cols-header
 
 # Two ways to sync
 
-The scan is committed. Now other devices need to know.
+The scan is committed locally. Now other devices need to know.
 
 ::left::
 
 ### Bluetooth mesh
 
 - Phones at the door talk over **BLE GATT** — no pairing needed
-- No internet, no server
-- Only the sync action goes out, never the DB
-- [Bridgefy](https://github.com/bridgefy/bridgefy-react-native) today
+- Peer-to-peer, no internet needed
+- Only broadcast sync actions
 
 ::right::
 
 ### Online
 
-- Every phone pushes its pending scans to the server
-- Server dedupes on UUID
+- Every phone pushes its pending scans to the server every **5s**
+- Server dedupes on [TID](https://atproto.com/specs/tid); bad items are dropped, the rest of the batch still applies
 - Any copy can deliver the scan
+- Regular polling brings other scans back, making sure app data is up to date
 - Works as soon as the network is back
 
 <!--
@@ -378,6 +358,9 @@ Speaker Notes:
 - GATT = Generic Attribute Profile: how two Bluetooth Low Energy devices connect and exchange data by reading and writing "characteristics". Each phone advertises a service, scans for others, connects and writes packets. No pairing.
 - Mesh gives the other gates the scan in a second or so, without internet.
 - Online is the source of truth in the end. Both tracks are independent and both are idempotent.
+- Push is independent of pull. Offline: sync is paused and rows stay syncedAt null. Push only runs when something is pending.
+- Server handles each action on its own: invalid ones are dropped, known TIDs are skipped, the rest apply. A succeeded scan sets redeemedAt on the server.
+- Nothing blocks the door: the scan already happened, this is catch-up.
 - Diagram next.
 -->
 
@@ -392,43 +375,11 @@ Speaker Notes:
 Click through:
 1. Gate A commits locally: syncActions + scanLogs, syncedAt null. The door is already done.
 2. Broadcast via Bridgefy, no internet. Only the sync action goes out, never the DB. On success A stamps broadcastedAt.
-3. Gate B looks up the UUID. Known: ignore. Unknown: upsert the scan log and the sync action in one transaction.
-4. Payoff: decideScan reads local scanLogs, so the next scan of that ticket at B is already_checked_in. No server.
+3. Gate B looks up the TID. Known: ignore. Unknown: upsert the scan log and the sync action in one transaction.
+4. Payoff: evaluateScan reads local scanLogs, so the next scan of that ticket at B is already_checked_in. No server.
 5. Separate track: every 5s each phone pushes rows with syncedAt null. B has a copy too, so if A never reconnects, B delivers the scan.
-6. Server dedupes on UUID: two phones pushing the same action is harmless.
+6. Server dedupes on TID: two phones pushing the same action is harmless.
 - Android needs Bluetooth + location permissions. The simulator is a no-op.
--->
-
----
-layout: two-cols-header
----
-
-# Catching up when the network is back
-
-Push and pull, in the background.
-
-::left::
-
-### Push — the outbox
-
-- `syncActions.push` every **5s**, only if pending
-- Server dedupes on UUID
-- Bad items dropped; the rest of the batch still applies
-- Scan already happened. This is catch-up.
-
-::right::
-
-### Pull — same loop as chapter 1
-
-- Scans from other gates and the server land in the local DB
-- Full page: again in **1s**. Short page: back to **~10s**
-- Nothing blocks the door
-
-<!--
-Speaker Notes:
-- Push is independent of pull. Offline: sync is paused and rows stay syncedAt null.
-- Server handles each action on its own: invalid ones are dropped, known UUIDs are skipped, the rest apply.
-- A succeeded scan sets redeemedAt on the server.
 -->
 
 ---
@@ -438,12 +389,12 @@ Speaker Notes:
 <v-clicks>
 
 1. **Camera** reads the QR — always on
-2. **SQLite query** loads the ticket, deals, scan logs, transfers
-3. **`decideScan()`** returns one of 12 outcomes (<Badge variant="positive">checked_in</Badge>, <Badge variant="negative">already_checked_in</Badge>, <Badge variant="negative">resold</Badge>, etc.)
+2. **SQLite query** loads the ticket, deal, entrances, scan logs and transfers
+3. **`evaluateScan()`** returns one outcome (<Badge variant="positive">checked_in</Badge>, <Badge variant="negative">already_checked_in</Badge>, <Badge variant="negative">resold</Badge>, etc.)
 4. **Transaction** writes `syncAction` (offline generated `TID`) w/ `scanLog` payload
 5. **Overlay** immediate feedback — staff already moved on
 6. **Bluetooth mesh** broadcasts the scan log to nearby phones
-7. **Push** to the server every few seconds, if we have a network
+7. **Push** to the server when online
 
 </v-clicks>
 
@@ -451,7 +402,7 @@ Speaker Notes:
 Speaker Notes:
 - Recap slide: this is the architecture.
 - Mesh and server push are asynchronous. The bouncer doesn't wait.
-- decideScan: 12 outcomes, not a boolean. still_loading = pull incomplete, unknown = pull complete and code absent. already_checked_in reads local scanLogs, mesh included. Force check-in is a permission.
+- evaluateScan: 12 outcomes, not a boolean. still_loading = pull incomplete, unknown = pull complete and code absent. already_checked_in reads local scanLogs, mesh included. Force check-in is a permission.
 -->
 
 ---
@@ -468,11 +419,11 @@ It takes **all** of these at the same time:
 - Scanned within **the same second**
 - Before the Bluetooth message from the first gate reaches the second
 
-Then both scans say `checked_in`, and the server keeps both logs (different UUIDs).
+Then both scans say `checked_in`, and the server keeps both logs (different TIDs).
 
 <br />
 
-***Almost impossible in practice**: no need to invent a distributed lock for it.*
+***Almost impossible in practice** ⇒ no need to invent a distributed lock*
 
 ::right::
 
@@ -494,14 +445,13 @@ layout: section
 glow: top-left
 ---
 
-# Chapter 3
+# Sell
 
-Sell
+Tickets and beers
 
 <!--
 Speaker Notes:
 - Scan path done. Now the other thing door and bar staff do: sell.
-- Running long? Start cutting in chapter 4.
 -->
 
 ---
@@ -510,15 +460,13 @@ layout: two-cols-header
 
 # No terminal needed
 
-Tickets at the door, beers at the bar.
-
 ::left::
 
 ### The need
 
-- Sell tickets on site
-- Sell beers, drinks, anything
-- No card terminal to carry, charge and lose
+- Sell tickets at the entrance
+- Sell anything inside
+- No card terminal to buy, carry, charge and lose
 
 ::right::
 
@@ -530,8 +478,9 @@ Tickets at the door, beers at the bar.
 
 <!--
 Speaker Notes:
-- Same beat as the scan: the phone does the job, no extra hardware.
-- Cash, card and Pix are permission-gated.
+- Same beat as the scan: the phone does the job, no extra hardware
+- Other payment methods accepted (cash, card and Pix)
+- Permission-gated
 -->
 
 ---
@@ -541,7 +490,9 @@ fit: contain
 
 # Tap to Pay
 
-Phone → tap → paid → share ticket
+Order → tap → paid → share ticket
+
+[`stripe-terminal-react-native`](https://github.com/stripe/stripe-terminal-react-native)
 
 ::right::
 
@@ -726,7 +677,7 @@ Call the oRPC procedure. Real DB. Isolated per test.
 await call(syncActions.push, { syncActions }, { context })
 ```
 
-UUID dedupe, permissions, refunds — same routers the phone hits.
+TID dedupe, permissions, refunds — same routers the phone hits.
 
 ::right::
 
@@ -745,8 +696,8 @@ Login, ticketing, sell. Not the camera. Yet.
 <!--
 Speaker Notes:
 - API: Vitest + call() from @orpc/server. Same procedures the app hits. Real Postgres, each test in a savepoint that's rolled back.
-- syncActions.push is the key test: UUID is idempotent, a bad item doesn't fail the batch, a succeeded scan sets redeemedAt.
-- decideScan / evaluateScan: Vitest on the client (~850 lines of tests), no DB. Don't mix it into the API column unless asked.
+- syncActions.push is the key test: TID is idempotent, a bad item doesn't fail the batch, a succeeded scan sets redeemedAt.
+- evaluateScan: Vitest on the client (~850 lines of tests), no DB. Don't mix it into the API column unless asked.
 - Maestro: login, seeded event, create a ticket, cash sale, logout. testIDs, not screenshots.
 - CI: EAS workflow on main: seed an event, iOS e2e build, Maestro (2 retries), teardown.
 - Camera scan isn't in Maestro (lighting, hardware). Channel surfing is how we QA that.
@@ -801,10 +752,10 @@ Antoine Rousseau — Engineering Manager @ Shotgun
 <!--
 Speaker Notes:
 - 10 minutes of Q&A. Likely questions:
-  - Double-scan: UUID idempotency + local scanLogs. The window exists before mesh/server. We chose door speed.
+  - Double-scan: TID idempotency + local scanLogs. The window exists before mesh/server. We chose door speed.
   - Battery: the camera session, frame processor and library (expo-camera today).
   - Mesh: Bridgefy crashed in the field. In-house @shotgun/mesh: GATT gossip, small meshes, we own the crashes.
   - Conflict UI: none. Staff see already_checked_in from local logs.
   - Printing: Star thermal printers, Skia-rendered tickets, local queue. On-site tickets, not PDF-only.
-  - Testing: Vitest on decideScan and oRPC; Maestro covers login/sell/ticketing, not camera scan (yet).
+  - Testing: Vitest on evaluateScan and oRPC; Maestro covers login/sell/ticketing, not camera scan (yet).
 -->

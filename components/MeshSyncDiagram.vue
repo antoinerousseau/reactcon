@@ -3,7 +3,7 @@
  * Sequence diagram of one scan travelling over the Bluetooth mesh.
  * Mirrors apps/backstage/src/providers/mesh:
  *   use-sync-action  → local transaction, then `sendData({ type: "syncAction" })`
- *   handlers/index   → `handleMeshSyncAction`: same UUID → ignore, else upsert
+ *   handlers/index   → `handleMeshSyncAction`: same TID → ignore, else upsert
  *   sync/sync-actions → every 5s, any phone pushes rows with `syncedAt: null`
  *
  * Drawn in a 1664-wide viewBox so it matches the slide's content width 1:1.
@@ -19,7 +19,7 @@ const boxW = 460
     width="1664"
     height="696"
     role="img"
-    aria-label="A scan is committed locally, broadcast over Bluetooth, deduped by UUID on the peer, then pushed to the server by any online phone."
+    aria-label="A scan is committed locally, broadcast over Bluetooth, deduped by TID on the peer, then pushed to the server by any online phone."
   >
     <defs>
       <marker id="mesh-arrow-teal" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
@@ -77,12 +77,12 @@ const boxW = 460
       <text class="t-sub mono" :x="lanes.a + 76" y="300">{ type: "syncAction" }</text>
     </g>
 
-    <!-- 3 · Gate B dedupes on UUID -->
+    <!-- 3 · Gate B dedupes on TID -->
     <g v-click>
       <rect class="box" :x="lanes.b - boxW / 2" y="330" :width="boxW" height="124" rx="8" />
       <circle class="badge" :cx="lanes.b - boxW / 2 + 40" cy="378" r="18" />
       <text class="t-badge" :x="lanes.b - boxW / 2 + 40" y="385" text-anchor="middle">3</text>
-      <text class="t-title" :x="lanes.b - boxW / 2 + 76" y="372">Known UUID?</text>
+      <text class="t-title" :x="lanes.b - boxW / 2 + 76" y="372">Known TID?</text>
       <text class="t-sub" :x="lanes.b - boxW / 2 + 76" y="404">Yes → ignore</text>
       <text class="t-sub" :x="lanes.b - boxW / 2 + 76" y="436">No → upsert <tspan class="mono">scanLogs</tspan> + action</text>
     </g>
@@ -115,7 +115,7 @@ const boxW = 460
       <rect class="box box-server" :x="lanes.s - boxW / 2" y="574" :width="boxW" height="104" rx="8" />
       <circle class="badge badge-peri" :cx="lanes.s - boxW / 2 + 40" cy="626" r="18" />
       <text class="t-badge" :x="lanes.s - boxW / 2 + 40" y="633" text-anchor="middle">6</text>
-      <text class="t-title" :x="lanes.s - boxW / 2 + 76" y="620">Dedupes on UUID</text>
+      <text class="t-title" :x="lanes.s - boxW / 2 + 76" y="620">Dedupes on TID</text>
       <text class="t-sub" :x="lanes.s - boxW / 2 + 76" y="650">First push wins, rest skipped</text>
     </g>
   </svg>
