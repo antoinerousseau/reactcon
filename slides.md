@@ -57,6 +57,25 @@ Speaker Notes:
 layout: image-right
 ---
 
+# Fast setup
+
+Create account → Open app → Scan QR → In
+
+::right::
+
+<SlidevVideo autoplay muted loop autoreset="slide">
+  <source src="./videos/login.mp4" type="video/mp4" />
+</SlidevVideo>
+
+<!--
+Speaker Notes:
+- Can also log in with username and password
+-->
+
+---
+layout: image-right
+---
+
 # You're in
 
 Press-and-hold → QR → result overlay
