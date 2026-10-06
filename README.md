@@ -1,11 +1,21 @@
-# Welcome to [Slidev](https://github.com/slidevjs/slidev)!
+# Surviving D-day
 
-To start the slide show:
+Presentation for the [React Native devCon](https://www.nextappcon.com/reactcon) (October 8, 2026 in Berlin).
+
+https://www.nextappcon.com/reactcon-new-speakers/antoine-rousseau
+
+## Develop
+
+This slideshow is made with [Slidev](https://github.com/slidevjs/slidev). To start it:
 
 - `pnpm install`
 - `pnpm dev`
 - visit <http://localhost:3030>
 
-Edit the [slides.md](./slides.md) to see the changes.
+Edit [slides.md](./slides.md) to see the changes.
 
-Learn more about Slidev at the [documentation](https://sli.dev/).
+[Slidev documentation](https://sli.dev/)
+
+## Online
+
+Automatically deploys @ https://reactcon.vercel.app/
