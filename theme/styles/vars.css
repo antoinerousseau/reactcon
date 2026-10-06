@@ -16,6 +16,9 @@
   --sg-teal: #46ecd5;
   --sg-peach: #ffc478;
   --sg-periwinkle: #7c86ff;
+  /* Not in the Figma file: a red tuned to sit with the other neons
+     (similar lightness/saturation to teal and peach) for negative states. */
+  --sg-red: #ff5a64;
 
   /* Semantic roles */
   --sg-surface: var(--sg-black);

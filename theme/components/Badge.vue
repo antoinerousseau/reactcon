@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /**
- * Status pill. The template palette has no red/green, so the four accent
- * colours carry the semantics: teal reads positive, peach cautionary,
- * pink negative.
+ * Status pill. The template palette has no red/green, so the accent colours
+ * carry the semantics: teal reads positive, peach cautionary, and negative
+ * uses --sg-red, a red added to match the palette.
  */
 withDefaults(defineProps<{
   variant?: 'default' | 'accent' | 'positive' | 'negative' | 'warning' | 'informative'
@@ -48,8 +48,8 @@ withDefaults(defineProps<{
 }
 
 .sg-badge[data-variant='negative'] {
-  background: color-mix(in srgb, var(--sg-pink) 18%, transparent);
-  color: var(--sg-pink);
+  background: color-mix(in srgb, var(--sg-red) 18%, transparent);
+  color: var(--sg-red);
 }
 
 .sg-badge[data-variant='informative'] {

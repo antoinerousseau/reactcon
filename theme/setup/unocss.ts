@@ -14,6 +14,7 @@ export default () => ({
       pink: 'var(--sg-pink)',
       peach: 'var(--sg-peach)',
       periwinkle: 'var(--sg-periwinkle)',
+      red: 'var(--sg-red)',
       surface: {
         DEFAULT: 'var(--sg-surface)',
         raised: 'var(--sg-surface-raised)',
