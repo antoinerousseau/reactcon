@@ -395,14 +395,9 @@
 .slidev-layout.sg-image-right {
   padding-bottom: var(--sg-margin-top);
 
-  .sg-image-right-text h1 {
-    margin-bottom: 24px;
-  }
-
   .sg-image-right-text p {
     font-size: var(--sg-body-2-size);
     line-height: 1.36;
-    letter-spacing: -0.01em;
   }
 }
 

@@ -1,7 +1,7 @@
 {
-  "name": "slidev-theme-shotgun-slides",
-  "version": "0.2.0",
-  "description": "Slidev theme matching Shotgun's \"[Template] Slides\" Figma deck",
+  "name": "slidev-theme-shotgun",
+  "version": "0.1.0",
+  "description": "Slidev theme matching Shotgun Slides Figma template",
   "author": "Shotgun",
   "license": "UNLICENSED",
   "keywords": [
@@ -10,8 +10,8 @@
     "shotgun"
   ],
   "engines": {
-    "node": ">=20.12.0",
-    "slidev": ">=52.0.0"
+    "node": ">=24.18.1",
+    "slidev": ">=53.0.0"
   },
   "slidev": {
     "colorSchema": "dark",
@@ -30,6 +30,6 @@
     }
   },
   "dependencies": {
-    "@slidev/types": "^52.19.1"
+    "@slidev/types": "^53.0.0"
   }
 }
