@@ -10,7 +10,7 @@ This slideshow is made with [Slidev](https://github.com/slidevjs/slidev). To sta
 
 - `pnpm install`
 - `pnpm dev`
-- visit <http://localhost:3030>
+- visit [localhost:3030](http://localhost:3030/)
 
 Edit [slides.md](./slides.md) to see the changes.
 
@@ -18,4 +18,5 @@ Edit [slides.md](./slides.md) to see the changes.
 
 ## Online
 
-Automatically deploys @ https://reactcon.vercel.app/
+Automatically deploys @ [shotgun-backstage-tech-presentation.vercel.app
+](https://shotgun-backstage-tech-presentation.vercel.app/)
