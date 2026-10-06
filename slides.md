@@ -5,7 +5,7 @@ layout: cover
 highlighter: shiki
 lineNumbers: false
 transition: slide-left
-title: Surviving D-Day — Offline-First React Native
+title: Surviving D-Day with Shotgun Backstage
 mdc: true
 ---
 
@@ -640,8 +640,6 @@ layout: end
 # Thank you
 
 ## Questions
-
-<br />
 
 Antoine Rousseau — Engineering Manager @ Shotgun
 
