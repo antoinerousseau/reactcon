@@ -11,7 +11,7 @@ mdc: true
 
 # Surviving D-Day
 
-## Offline-first ground operations in React Native
+## Shotgun Backstage: a React Native app for ground operations
 
 Antoine Rousseau — Engineering Manager @ Shotgun
 
@@ -641,7 +641,13 @@ layout: end
 
 ## Questions
 
+<br />
+
 Antoine Rousseau — Engineering Manager @ Shotgun
+
+::right::
+
+<img src="./images/linkedin.svg" alt="LinkedIn" />
 
 <!--
 Speaker Notes:
