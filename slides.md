@@ -35,7 +35,7 @@ layout: two-cols-header
 
 - Basements, festival fields, packed clubs
 - Cellular dies when 10k people arrive
-- Staff are stressed and won't open a manual
+- Stressed staff won't read the documentation
 - A freeze at the gate can lead to dangerous crowding
 
 ::right::
@@ -75,13 +75,13 @@ App launch & login
 - **[TanStack React Query](https://tanstack.com/query/latest/docs/framework/react/overview)** — hooks for data fetching, caching, and state management
 - **[react-native-mmkv](https://github.com/mrousavy/react-native-mmkv)** — synchronous key-value storage for settings
 - **[Uniwind](https://docs.uniwind.dev/)** pro — Tailwind classes, C++ engine for fast rendering
-- **[react-native-reanimated](https://docs.expo.dev/versions/latest/sdk/reanimated/)** & **[react-native-worklets](https://reactnative.dev/docs/worklets)** — Smooth animations
+- **[react-native-reanimated](https://docs.expo.dev/versions/latest/sdk/reanimated/)** & **[react-native-worklets](https://reactnative.dev/docs/worklets)** — smooth animations
 
 </v-clicks>
 
 <!--
 Speaker Notes:
-- Many others useful Expo libraries used, hence the choice for Expo
+- We use many other useful Expo libraries, hence the choice of Expo
 - TanStack Query reads from SQLite
 -->
 
@@ -135,7 +135,7 @@ Old app versions get an HTTP 406 → `/outdated-version`.
 Speaker Notes:
 - oRPC: end-to-end TypeScript.
 - x-app-version: we set a minimum version in an oRPC middleware.
-- other middlewares: auth, permissions, logging, etc.
+- Other middlewares: auth, permissions, logging, etc.
 -->
 
 ---
@@ -184,7 +184,7 @@ Events, tickets, deals, scan logs, orders, transfers…
 <!--
 Speaker Notes:
 - Full page (2,000) means there's more: poll again in 1s. Short page means we're current: back to steady polling (10s for most streams, slower for rarely-changing ones).
-- Until the first pull is complete a missing ticket is "still_loading", not "unknown". We'll see that in the Scan chapter.
+- Until the first pull is complete, a missing ticket is "still_loading", not "unknown". We'll see that in the Scan chapter.
 - All this is done in the background.
 -->
 
@@ -216,7 +216,7 @@ Assigned per event: a role gives defaults, which can be overridden
 Speaker Notes:
 - A bartender sells cash but doesn't refund last night's online sales.
 - A door person scans, but can't force check-in.
-- In the backend and Web admin we pick roles, that give presets of permissions for the allowed events.
+- In the backend and web admin, we pick roles that give presets of permissions for the allowed events.
 - Offline, the UI uses the last synced permissions. The server checks again on every call.
 -->
 
@@ -263,8 +263,8 @@ The camera is the biggest battery and speed cost of the scan module.
 
 <v-clicks>
 
-- **Open camera** — uses battery, but takes up to 1 second to start it so we keep it open between scans
-- **Frame processor** — Looking for a QR code or barcode on every frame, so only when actively scanning
+- **Open camera** — uses battery, but it takes up to 1 second to start, so we keep it open between scans
+- **Frame processor** — looks for a QR code or barcode on every frame, so it only runs when actively scanning
 - **The library** — [expo-camera](https://docs.expo.dev/versions/latest/sdk/camera/) is fine so far; we'll measure others if it isn't
 
 </v-clicks>
@@ -272,21 +272,21 @@ The camera is the biggest battery and speed cost of the scan module.
 <!--
 Speaker Notes:
 - Reliability first: staff with gloves, in the dark, in a hurry. The fewer gestures, the fewer mistakes.
-- Alternatives: react-native-vision-camera, or paid solutions like Scanbot
+- Alternatives: react-native-vision-camera, or paid solutions like Scanbot.
 -->
 
 ---
 
 # A local database of tickets
 
-A scan never waits on the network: SQLite is the source of truth at the door, everything a scan needs is already on the phone.
+A scan never waits on the network. SQLite is the source of truth at the door: everything a scan needs is already on the phone.
 
 <v-clicks>
 
 - One **SQLite JOIN** loads the ticket, deal, entrances, scan logs and transfers
 - Instant: no request, no spinner, no timeout
 - Kept fresh by the regular polling and mesh sync
-- Ticket not there + initial polling not done? `still_loading` instead of `unknown`
+- Ticket not there & initial polling not done? `still_loading` instead of `unknown`
 
 </v-clicks>
 
@@ -306,7 +306,7 @@ const syncAction = {
   tid: generateTID(), // Timestamp Identifier, like UUID but sortable and shorter
   eventId: payload.eventId,
   payload: scanLog,
-  broadcastedAt: null,
+  broadcastAt: null,
   syncedAt: null,
 };
 
@@ -323,7 +323,7 @@ void sendData({ type: "syncAction", syncAction });
 <!--
 Speaker Notes:
 - Outbox: the scan is committed on the device before anyone else knows.
-- syncedAt null = not on the server yet. broadcastedAt tracks the mesh. A failed broadcast doesn't roll back the scan.
+- syncedAt null = not on the server yet. broadcastAt tracks the mesh. A failed broadcast doesn't roll back the scan.
 - TIDs ([ATProto](https://atproto.com/specs/tid)): sortable, unique IDs generated offline with no server round-trip.
 -->
 
@@ -341,16 +341,16 @@ The scan is committed locally. Now other devices need to know.
 
 - Phones at the door talk over **BLE GATT** — no pairing needed
 - Peer-to-peer, no internet needed
-- Only broadcast sync actions
+- Only sync actions are broadcast
 
 ::right::
 
 ### Online
 
 - Every phone pushes its pending scans to the server every **5s**
-- Server dedupes on [TID](https://atproto.com/specs/tid); bad items are dropped, the rest of the batch still applies
+- Server dedupes on [TID](https://atproto.com/specs/tid): scan logs are a grow-only set (a G-Set CRDT), so merging is a union. Bad items are dropped, the rest of the batch still applies
 - Any copy can deliver the scan
-- Regular polling brings other scans back, making sure app data is up to date
+- Regular polling brings other scans back, keeping app data up to date
 - Works as soon as the network is back
 
 <!--
@@ -359,7 +359,10 @@ Speaker Notes:
 - Mesh gives the other gates the scan in a second or so, without internet.
 - Online is the source of truth in the end. Both tracks are independent and both are idempotent.
 - Push is independent of pull. Offline: sync is paused and rows stay syncedAt null. Push only runs when something is pending.
-- Server handles each action on its own: invalid ones are dropped, known TIDs are skipped, the rest apply. A succeeded scan sets redeemedAt on the server.
+- Server handles each action on its own: invalid ones are dropped, known TIDs are skipped, the rest apply. A successful scan sets redeemedAt on the server.
+- A G-Set only supports add and merge, which is a union.
+- Merge is idempotent and commutative, which is why mesh and server can both deliver.
+- It converges but doesn't prevent concurrent adds, which is the double-scan window on the next slides.
 - Nothing blocks the door: the scan already happened, this is catch-up.
 - Diagram next.
 -->
@@ -374,7 +377,7 @@ Speaker Notes:
 Speaker Notes:
 Click through:
 1. Gate A commits locally: syncActions + scanLogs, syncedAt null. The door is already done.
-2. Broadcast via Bridgefy, no internet. Only the sync action goes out, never the DB. On success A stamps broadcastedAt.
+2. Broadcast via Bridgefy, no internet. Only the sync action goes out, never the DB. On success A stamps broadcastAt.
 3. Gate B looks up the TID. Known: ignore. Unknown: upsert the scan log and the sync action in one transaction.
 4. Payoff: evaluateScan reads local scanLogs, so the next scan of that ticket at B is already_checked_in. No server.
 5. Separate track: every 5s each phone pushes rows with syncedAt null. B has a copy too, so if A never reconnects, B delivers the scan.
@@ -391,8 +394,8 @@ Click through:
 1. **Camera** reads the QR — always on
 2. **SQLite query** loads the ticket, deal, entrances, scan logs and transfers
 3. **`evaluateScan()`** returns one outcome (<Badge variant="positive">checked_in</Badge>, <Badge variant="negative">already_checked_in</Badge>, <Badge variant="negative">resold</Badge>, etc.)
-4. **Transaction** writes `syncAction` (offline generated `TID`) w/ `scanLog` payload
-5. **Overlay** immediate feedback — staff already moved on
+4. **Transaction** writes `syncAction` (offline-generated `TID`) with `scanLog` payload
+5. **Overlay** gives immediate feedback — staff have already moved on
 6. **Bluetooth mesh** broadcasts the scan log to nearby phones
 7. **Push** to the server when online
 
@@ -429,13 +432,14 @@ Then both scans say `checked_in`, and the server keeps both logs (different TIDs
 
 # Unstable proprietary library
 
-- We use [Bridgefy](https://github.com/bridgefy/bridgefy-react-native), but it can sometimes crash 
+- We use [Bridgefy](https://github.com/bridgefy/bridgefy-react-native), but it sometimes crashes
 - We will replace it with **[`@shotgun/mesh`](https://github.com/shotgun-warehouse/mesh)** — a simpler Bluetooth mesh library we vibe-coded.
 
 <!--
 Speaker Notes:
 - Be honest, but keep it in proportion: this is the question you will get, and it needs several things at once.
 - Same ticket, two gates, same second, before the mesh message lands. The mesh shrinks that window but doesn't fully close it (range, permissions, no distributed lock).
+- A G-Set converges, it doesn't arbitrate. That's why two gates can both say checked_in.
 - Say this sentence: we accept a tiny double-scan window over blocking the door.
 - Why own the mesh: Bridgefy crashes in the field. @shotgun/mesh is GATT writes + TTL gossip for small meshes, inspired by BitChat.
 -->
@@ -445,7 +449,7 @@ layout: section
 glow: top-left
 ---
 
-# Sell
+# Sell on the go
 
 Tickets and beers
 
@@ -466,7 +470,7 @@ layout: two-cols-header
 
 - Sell tickets at the entrance
 - Sell anything inside
-- No card terminal to buy, carry, charge and lose
+- No card terminal to buy, carry, charge, or lose
 
 ::right::
 
@@ -503,9 +507,7 @@ Order → tap → paid → share ticket
 <!--
 Speaker Notes:
 - Stripe Terminal handles payment. Cash, card and Pix are permission-gated.
-- Our native Expo module (IosTapToPay) only shows Apple's "how to tap" sheet. Stripe does the rest.
-- After the sale: share the ticket, or print it (next slide).
-- Session expiry mid-event: reconnect and retry. Don't dwell unless asked.
+- Explain the different ticket-sharing methods: QR code, email, native share sheet, or printing if needed.
 -->
 
 ---
@@ -515,9 +517,9 @@ fit: contain
 
 # Printing
 
-- Ticket = QR code + infos
+- Ticket = QR code + info
 - Drawn using [Skia](https://shopify.github.io/react-native-skia/), for our Star Micronics printers
-- Prints by itself after the sale
+- Prints automatically after the sale
 - Over Bluetooth or USB
 - A local queue handles retries and uncertain outcomes
 
@@ -530,7 +532,7 @@ Speaker Notes:
 - Why Skia: the ticket layout is ours, not ESC/POS templates. And it's easier to test: the layout is drawn by code we can render and check without a printer.
 - The queue lives on the device: same offline-first instinct as scans.
 - Pairing and test print are in settings. After a sale a print is enqueued; cash sales can open the drawer.
-- We can rent the printer alone, or integrated into our drawer (in that case it automatically opens the drawer after a cash sale)
+- We can rent the printer alone, or one integrated into our cash drawer (in that case, it automatically opens the drawer after a cash sale)
 -->
 
 ---
@@ -585,7 +587,7 @@ Login, ticketing, sell. Not the camera. Yet.
 <!--
 Speaker Notes:
 - API: Vitest + call() from @orpc/server. Same procedures the app hits. Real Postgres, each test in a savepoint that's rolled back.
-- syncActions.push is the key test: TID is idempotent, a bad item doesn't fail the batch, a succeeded scan sets redeemedAt.
+- syncActions.push is the key test: TID is idempotent, a bad item doesn't fail the batch, a successful scan sets redeemedAt.
 - evaluateScan: Vitest on the client (~850 lines of tests), no DB. Don't mix it into the API column unless asked.
 - Maestro: login, seeded event, create a ticket, cash sale, logout. testIDs, not screenshots.
 - CI: EAS workflow on main: seed an event, iOS e2e build, Maestro (2 retries), teardown.
@@ -618,7 +620,7 @@ JS changes go over the air. Data changes migrate on the phone.
 <!--
 Speaker Notes:
 - Runtime version follows appVersion: JS-only PRs go OTA, native changes need a new binary.
-- The local DB is in the hands of thousands of phones: the schema can't just be "recreated". Drizzle migrations handle the upgrade.
+- The local DB lives on thousands of phones: the schema can't just be "recreated". Drizzle migrations handle the upgrade.
 - x-app-version / 406 → /outdated-version: we force upgrades for incompatible clients.
 -->
 
@@ -703,21 +705,21 @@ layout: cards
 
 ::cards::
 
-<Card label="Treat the network as optional">
+<Card label="Assume the network is gone">
 
 Scan against SQLite. Sync is an outbox.
 
 </Card>
 
-<Card label="Name the race">
+<Card label="The phone is the hardware">
 
-Mesh shrinks double-scans. It does not give you a lock.
+It scans, takes payment and delivers the ticket.
 
 </Card>
 
-<Card label="Share types, not URLs">
+<Card label="Break it before D-Day">
 
-Monorepo + oRPC + Zod.
+Shared types, E2E tests, real-device QA on every PR.
 
 </Card>
 
